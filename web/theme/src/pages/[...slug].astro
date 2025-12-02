@@ -2,12 +2,20 @@
 import Layout from '../layouts/Layout.astro';
 import BlockRenderer from '../components/BlockRenderer.astro';
 
+interface PageMeta {
+  meta_title?: string;
+  meta_description?: string;
+  og_image?: string;
+  no_index?: boolean;
+}
+
 interface Page {
   id: string;
   slug: string;
   title: string;
   blocks?: any[];
   status: string;
+  meta?: PageMeta | string;
 }
 
 // Mark this route as dynamic (not prerendered)
@@ -59,13 +67,37 @@ if (page.blocks) {
     blocks = page.blocks;
   }
 }
+
+// Parse meta from JSON if it's a string
+let pageMeta: PageMeta = {};
+if (page.meta) {
+  if (typeof page.meta === 'string') {
+    try {
+      pageMeta = JSON.parse(page.meta);
+    } catch (e) {
+      pageMeta = {};
+    }
+  } else if (typeof page.meta === 'object') {
+    pageMeta = page.meta as PageMeta;
+  }
+}
+
+// Extract SEO data
+const metaTitle = pageMeta.meta_title || page.title;
+const metaDescription = pageMeta.meta_description;
+const ogImage = pageMeta.og_image;
+const noIndex = pageMeta.no_index || false;
 ---
 
-<Layout title={page.title}>
+<Layout 
+  title={metaTitle}
+  description={metaDescription}
+  image={ogImage}
+  noIndex={noIndex}
+>
   <main>
     {blocks.map((block) => (
       <BlockRenderer block={block} />
     ))}
   </main>
 </Layout>
-

@@ -2,20 +2,54 @@
 interface Props {
   title: string;
   description?: string;
+  image?: string;
+  noIndex?: boolean;
 }
 
-const { title, description = "Gohac CMS" } = Astro.props;
+const { 
+  title, 
+  description, 
+  image,
+  noIndex = false 
+} = Astro.props;
+
+// Use meta_title if provided, otherwise fallback to title
+const metaTitle = title;
+const metaDescription = description || "Gohac CMS";
+const ogImage = image;
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'http://localhost:4321';
+const fullImageUrl = ogImage ? (ogImage.startsWith('http') ? ogImage : `${import.meta.env.PUBLIC_API_URL || 'http://localhost:3131'}${ogImage}`) : undefined;
 ---
 
 <!doctype html>
 <html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
-    <title>{title}</title>
+    
+    <!-- Primary Meta Tags -->
+    <title>{metaTitle}</title>
+    <meta name="title" content={metaTitle} />
+    <meta name="description" content={metaDescription} />
+    
+    <!-- Robots Meta Tag -->
+    {noIndex && <meta name="robots" content="noindex, nofollow" />}
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={metaTitle} />
+    <meta property="og:description" content={metaDescription} />
+    {fullImageUrl && <meta property="og:image" content={fullImageUrl} />}
+    <meta property="og:url" content={siteUrl} />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={metaTitle} />
+    <meta name="twitter:description" content={metaDescription} />
+    {fullImageUrl && <meta name="twitter:image" content={fullImageUrl} />}
+    
     <script>
       // Apply dark theme immediately to prevent flash
       if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -45,4 +79,3 @@ const { title, description = "Gohac CMS" } = Astro.props;
     color-scheme: dark;
   }
 </style>
-

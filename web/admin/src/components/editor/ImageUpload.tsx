@@ -92,6 +92,25 @@ export default function ImageUpload({
     onChange('')
   }
 
+  // Normalize image URL for preview
+  // If URL is relative (starts with /), use it directly
+  // If URL is absolute (starts with http), use it as-is
+  // Otherwise, prepend API base URL
+  const getImageSrc = () => {
+    if (!value) return ''
+    if (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('data:')) {
+      return value
+    }
+    // Relative URL starting with /uploads/ should work from root
+    // But in admin panel (/admin), we need to ensure it works
+    // Since Vite proxy handles /api, we can use relative path
+    if (value.startsWith('/')) {
+      return value
+    }
+    // Fallback: prepend API base URL
+    return `/api${value}`
+  }
+
   return (
     <div className="image-upload">
       {label && (
@@ -104,7 +123,7 @@ export default function ImageUpload({
       {value ? (
         <div className="image-preview-container">
           <div className="image-preview-wrapper">
-            <img src={value} alt="Preview" className="image-preview-img" />
+            <img src={getImageSrc()} alt="Preview" className="image-preview-img" />
             <button
               type="button"
               onClick={handleRemove}

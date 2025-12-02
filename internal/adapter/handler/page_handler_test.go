@@ -317,3 +317,157 @@ func TestPageHandler_UpdatePage_WithBlocks(t *testing.T) {
 	assert.Len(t, dbBlocks, 1)
 	assert.Equal(t, "hero", dbBlocks[0].Type)
 }
+
+func TestPageHandler_CreatePage_WithMeta(t *testing.T) {
+	app, db := setupTestApp(t)
+
+	metaData := map[string]interface{}{
+		"meta_title":       "Custom SEO Title",
+		"meta_description": "Custom SEO description for search engines",
+		"og_image":         "/uploads/images/test.jpg",
+		"no_index":         true,
+	}
+
+	reqBody := CreatePageRequest{
+		Slug:   "seo-test-page",
+		Title:  "SEO Test Page",
+		Status: "draft",
+		Meta:   metaData,
+	}
+
+	body, err := json.Marshal(reqBody)
+	require.NoError(t, err)
+
+	req := httptest.NewRequest("POST", "/api/v1/pages", bytes.NewBuffer(body))
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := app.Test(req)
+	require.NoError(t, err)
+
+	assert.Equal(t, fiber.StatusCreated, resp.StatusCode)
+
+	var page domain.Page
+	err = json.NewDecoder(resp.Body).Decode(&page)
+	require.NoError(t, err)
+	assert.Equal(t, "seo-test-page", page.Slug)
+	assert.Equal(t, "SEO Test Page", page.Title)
+
+	// Verify meta was saved
+	require.NotNil(t, page.Meta)
+	var savedMeta map[string]interface{}
+	err = json.Unmarshal(page.Meta, &savedMeta)
+	require.NoError(t, err)
+	assert.Equal(t, "Custom SEO Title", savedMeta["meta_title"])
+	assert.Equal(t, "Custom SEO description for search engines", savedMeta["meta_description"])
+	assert.Equal(t, "/uploads/images/test.jpg", savedMeta["og_image"])
+	assert.Equal(t, true, savedMeta["no_index"])
+
+	// Verify in database
+	repo := repository.NewPageRepository(db)
+	ctx := database.SetDBInContext(context.Background(), db)
+	dbPage, err := repo.GetByID(ctx, page.ID)
+	require.NoError(t, err)
+
+	var dbMeta map[string]interface{}
+	err = json.Unmarshal(dbPage.Meta, &dbMeta)
+	require.NoError(t, err)
+	assert.Equal(t, "Custom SEO Title", dbMeta["meta_title"])
+	assert.Equal(t, true, dbMeta["no_index"])
+}
+
+func TestPageHandler_UpdatePage_WithMeta(t *testing.T) {
+	app, db := setupTestApp(t)
+
+	// Create a page first
+	repo := repository.NewPageRepository(db)
+	ctx := database.SetDBInContext(context.Background(), db)
+
+	page := &domain.Page{
+		Slug:   "meta-update-test",
+		Title:  "Meta Update Test Page",
+		Status: domain.PageStatusDraft,
+	}
+	err := repo.Create(ctx, page)
+	require.NoError(t, err)
+
+	// Update the page with meta
+	metaData := map[string]interface{}{
+		"meta_title":       "Updated SEO Title",
+		"meta_description": "Updated SEO description",
+		"og_image":         "/uploads/images/updated.jpg",
+		"no_index":         false,
+	}
+
+	updateReq := UpdatePageRequest{
+		Title: "Updated Title",
+		Meta:  metaData,
+	}
+
+	body, err := json.Marshal(updateReq)
+	require.NoError(t, err)
+
+	req := httptest.NewRequest("PUT", "/api/v1/pages/"+page.ID.String(), bytes.NewBuffer(body))
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := app.Test(req)
+	require.NoError(t, err)
+
+	assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+
+	var updatedPage domain.Page
+	err = json.NewDecoder(resp.Body).Decode(&updatedPage)
+	require.NoError(t, err)
+	assert.Equal(t, "Updated Title", updatedPage.Title)
+
+	// Verify meta was updated
+	require.NotNil(t, updatedPage.Meta)
+	var savedMeta map[string]interface{}
+	err = json.Unmarshal(updatedPage.Meta, &savedMeta)
+	require.NoError(t, err)
+	assert.Equal(t, "Updated SEO Title", savedMeta["meta_title"])
+	assert.Equal(t, "Updated SEO description", savedMeta["meta_description"])
+	assert.Equal(t, "/uploads/images/updated.jpg", savedMeta["og_image"])
+	assert.Equal(t, false, savedMeta["no_index"])
+
+	// Verify in database
+	dbPage, err := repo.GetByID(ctx, page.ID)
+	require.NoError(t, err)
+
+	var dbMeta map[string]interface{}
+	err = json.Unmarshal(dbPage.Meta, &dbMeta)
+	require.NoError(t, err)
+	assert.Equal(t, "Updated SEO Title", dbMeta["meta_title"])
+	assert.Equal(t, false, dbMeta["no_index"])
+}
+
+func TestPageHandler_CreatePage_WithEmptyMeta(t *testing.T) {
+	app, _ := setupTestApp(t)
+
+	reqBody := CreatePageRequest{
+		Slug:   "empty-meta-test",
+		Title:  "Empty Meta Test Page",
+		Status: "draft",
+		Meta:   nil,
+	}
+
+	body, err := json.Marshal(reqBody)
+	require.NoError(t, err)
+
+	req := httptest.NewRequest("POST", "/api/v1/pages", bytes.NewBuffer(body))
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := app.Test(req)
+	require.NoError(t, err)
+
+	assert.Equal(t, fiber.StatusCreated, resp.StatusCode)
+
+	var page domain.Page
+	err = json.NewDecoder(resp.Body).Decode(&page)
+	require.NoError(t, err)
+	assert.Equal(t, "empty-meta-test", page.Slug)
+
+	// Meta should be empty or null
+	if len(page.Meta) > 0 {
+		var meta map[string]interface{}
+		err = json.Unmarshal(page.Meta, &meta)
+		require.NoError(t, err)
+		assert.Empty(t, meta)
+	}
+}

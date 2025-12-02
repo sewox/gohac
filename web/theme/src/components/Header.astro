@@ -1,0 +1,182 @@
+---
+import { getGlobalSettings, getMenuById } from '../lib/api';
+
+interface Props {
+  settings?: {
+    site_name: string;
+    logo: string;
+    header_menu_id?: string;
+  };
+  menuItems?: Array<{
+    label: string;
+    url: string;
+    target?: string;
+  }>;
+}
+
+// Fetch data if not provided as props
+let settings = Astro.props.settings;
+let menuItems = Astro.props.menuItems;
+
+if (!settings || !menuItems) {
+  const fetchedSettings = await getGlobalSettings();
+  settings = fetchedSettings;
+  
+  // Fetch menu if header_menu_id is set
+  if (fetchedSettings.header_menu_id) {
+    try {
+      const menu = await getMenuById(fetchedSettings.header_menu_id);
+      menuItems = menu.items || [];
+    } catch (error) {
+      console.error('Failed to load header menu:', error);
+      menuItems = [];
+    }
+  } else {
+    menuItems = [];
+  }
+}
+
+const siteName = settings?.site_name || 'Gohac CMS';
+const logoUrl = settings?.logo;
+const API_BASE_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3131';
+const fullLogoUrl = logoUrl ? (logoUrl.startsWith('http') ? logoUrl : `${API_BASE_URL}${logoUrl}`) : null;
+---
+
+<header class="header">
+  <div class="container mx-auto px-4">
+    <nav class="header-nav">
+      <div class="header-brand">
+        {fullLogoUrl ? (
+          <a href="/" class="logo-link">
+            <img src={fullLogoUrl} alt={siteName} class="logo-image" />
+          </a>
+        ) : (
+          <a href="/" class="logo-text">
+            {siteName}
+          </a>
+        )}
+      </div>
+
+      {menuItems && menuItems.length > 0 && (
+        <ul class="header-menu">
+          {menuItems.map((item) => (
+            <li class="menu-item">
+              <a 
+                href={item.url} 
+                class="menu-link"
+                target={item.target || '_self'}
+                rel={item.target === '_blank' ? 'noopener noreferrer' : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </nav>
+  </div>
+</header>
+
+<style>
+  .header {
+    background: rgba(17, 24, 39, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(75, 85, 99, 0.3);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 0;
+  }
+
+  .header-brand {
+    display: flex;
+    align-items: center;
+  }
+
+  .logo-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+  }
+
+  .logo-image {
+    height: 40px;
+    width: auto;
+    max-width: 200px;
+    object-fit: contain;
+  }
+
+  .logo-text {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .logo-text:hover {
+    color: #60a5fa;
+  }
+
+  .header-menu {
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+  }
+
+  .menu-item {
+    margin: 0;
+  }
+
+  .menu-link {
+    color: #e5e7eb;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: color 0.2s;
+    padding: 0.5rem 0;
+    position: relative;
+  }
+
+  .menu-link:hover {
+    color: #60a5fa;
+  }
+
+  .menu-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: #60a5fa;
+    transition: width 0.2s;
+  }
+
+  .menu-link:hover::after {
+    width: 100%;
+  }
+
+  @media (max-width: 768px) {
+    .header-nav {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .header-menu {
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+    }
+  }
+</style>
+

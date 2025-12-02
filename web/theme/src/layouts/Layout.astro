@@ -1,4 +1,7 @@
 ---
+import Header from '../components/Header.astro';
+import { getGlobalSettings } from '../lib/api';
+
 interface Props {
   title: string;
   description?: string;
@@ -13,12 +16,22 @@ const {
   noIndex = false 
 } = Astro.props;
 
+// Fetch global settings
+const settings = await getGlobalSettings();
+
 // Use meta_title if provided, otherwise fallback to title
 const metaTitle = title;
-const metaDescription = description || "Gohac CMS";
+const metaDescription = description || settings.site_name || "Gohac CMS";
 const ogImage = image;
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'http://localhost:4321';
 const fullImageUrl = ogImage ? (ogImage.startsWith('http') ? ogImage : `${import.meta.env.PUBLIC_API_URL || 'http://localhost:3131'}${ogImage}`) : undefined;
+
+// Favicon URL
+const faviconUrl = settings.favicon 
+  ? (settings.favicon.startsWith('http') 
+      ? settings.favicon 
+      : `${import.meta.env.PUBLIC_API_URL || 'http://localhost:3131'}${settings.favicon}`)
+  : '/favicon.svg';
 ---
 
 <!doctype html>
@@ -26,7 +39,7 @@ const fullImageUrl = ogImage ? (ogImage.startsWith('http') ? ogImage : `${import
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href={faviconUrl} />
     <meta name="generator" content={Astro.generator} />
     
     <!-- Primary Meta Tags -->
@@ -60,6 +73,7 @@ const fullImageUrl = ogImage ? (ogImage.startsWith('http') ? ogImage : `${import
     </script>
   </head>
   <body class="bg-gray-900 text-gray-100 antialiased">
+    <Header settings={settings} />
     <slot />
   </body>
 </html>

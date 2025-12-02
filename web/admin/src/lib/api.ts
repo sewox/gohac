@@ -43,3 +43,17 @@ export const pagesAPI = {
   delete: (id: string) => api.delete(`/v1/pages/${id}`),
 }
 
+export const settingsAPI = {
+  get: () => api.get('/public/settings'),
+  update: (data: any) => api.put('/v1/settings', data),
+}
+
+export const menusAPI = {
+  list: () => api.get('/v1/menus'),
+  get: (id: string) => api.get(`/v1/menus/${id}`),
+  create: (data: any) => api.post('/v1/menus', data),
+  update: (id: string, data: any) => api.put(`/v1/menus/${id}`, data),
+  delete: (id: string) => api.delete(`/v1/menus/${id}`),
+  getPublic: (id: string) => api.get(`/public/menus/${id}`),
+}
+

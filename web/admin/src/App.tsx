@@ -7,6 +7,9 @@ import Dashboard from './pages/Dashboard'
 import PageList from './pages/pages/PageList'
 import PageForm from './pages/pages/PageForm'
 import PageEdit from './pages/pages/PageEdit'
+import GeneralSettings from './pages/settings/GeneralSettings'
+import MenuList from './pages/menus/MenuList'
+import MenuForm from './pages/menus/MenuForm'
 import './App.css'
 
 function App() {
@@ -57,6 +60,50 @@ function App() {
               <RequireAuth>
                 <Layout>
                   <PageEdit />
+                </Layout>
+              </RequireAuth>
+            }
+          />
+
+          <Route
+            path="/admin/menus"
+            element={
+              <RequireAuth>
+                <Layout>
+                  <MenuList />
+                </Layout>
+              </RequireAuth>
+            }
+          />
+
+          <Route
+            path="/admin/menus/new"
+            element={
+              <RequireAuth>
+                <Layout>
+                  <MenuForm />
+                </Layout>
+              </RequireAuth>
+            }
+          />
+
+          <Route
+            path="/admin/menus/:id/edit"
+            element={
+              <RequireAuth>
+                <Layout>
+                  <MenuForm />
+                </Layout>
+              </RequireAuth>
+            }
+          />
+
+          <Route
+            path="/admin/settings"
+            element={
+              <RequireAuth>
+                <Layout>
+                  <GeneralSettings />
                 </Layout>
               </RequireAuth>
             }

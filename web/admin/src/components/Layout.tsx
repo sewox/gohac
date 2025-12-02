@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { LogOut, LayoutDashboard, FileText, Settings } from 'lucide-react'
+import { LogOut, LayoutDashboard, FileText, Settings, Menu } from 'lucide-react'
 import './Layout.css'
 
 interface LayoutProps {
@@ -35,8 +35,15 @@ export default function Layout({ children }: LayoutProps) {
             <span>Pages</span>
           </Link>
           <Link
+            to="/admin/menus"
+            className={`nav-item ${location.pathname.startsWith('/admin/menus') ? 'active' : ''}`}
+          >
+            <Menu size={20} />
+            <span>Menus</span>
+          </Link>
+          <Link
             to="/admin/settings"
-            className={`nav-item ${location.pathname === '/admin/settings' ? 'active' : ''}`}
+            className={`nav-item ${location.pathname.startsWith('/admin/settings') ? 'active' : ''}`}
           >
             <Settings size={20} />
             <span>Settings</span>

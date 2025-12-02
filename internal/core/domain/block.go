@@ -26,6 +26,7 @@ const (
 	BlockTypeFAQ         BlockType = "faq"
 	BlockTypeTestimonial BlockType = "testimonial"
 	BlockTypeCTA         BlockType = "cta"
+	BlockTypeMenu        BlockType = "menu"
 )
 
 // BlockData represents the structure for common block data types
@@ -142,4 +143,11 @@ type CTABlockData struct {
 	ButtonURL   string `json:"button_url"`
 	ButtonStyle string `json:"button_style,omitempty"` // primary, secondary, outline
 	Background  string `json:"background,omitempty"`   // Color or gradient
+}
+
+// MenuBlockData represents data for a menu block
+// MenuID references a Menu entity by UUID
+type MenuBlockData struct {
+	MenuID string `json:"menu_id"`         // UUID of the menu to display
+	Style  string `json:"style,omitempty"` // horizontal, vertical, dropdown
 }

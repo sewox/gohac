@@ -122,8 +122,54 @@ func main() {
 
 // migrateDatabase runs database migrations
 func migrateDatabase(db *gorm.DB) error {
+	// Check if menus table has old 'position' column and migrate it
+	if db.Migrator().HasTable(&domain.Menu{}) {
+		if db.Migrator().HasColumn(&domain.Menu{}, "position") {
+			// Old schema detected - need to migrate
+			// SQLite doesn't support DROP COLUMN directly, so we need to recreate the table
+			log.Println("🔄 Migrating menus table: removing 'position' column, adding 'name' column")
+
+			tempTable := "menus_new"
+
+			// Create temporary table with new schema
+			if err := db.Exec(`
+				CREATE TABLE IF NOT EXISTS ` + tempTable + ` (
+					id TEXT PRIMARY KEY,
+					tenant_id TEXT,
+					name TEXT NOT NULL,
+					description TEXT,
+					items TEXT,
+					created_at DATETIME,
+					updated_at DATETIME
+				)
+			`).Error; err != nil {
+				log.Printf("⚠️  Warning: Failed to create temp table: %v", err)
+			} else {
+				// Copy data (if any) - use position value as name
+				db.Exec(`
+					INSERT INTO ` + tempTable + ` (id, tenant_id, name, description, items, created_at, updated_at)
+					SELECT id, tenant_id, COALESCE(position, 'Unnamed Menu') as name, '' as description, items, created_at, updated_at
+					FROM menus
+				`)
+
+				// Drop old table
+				db.Exec("DROP TABLE menus")
+
+				// Rename new table
+				db.Exec("ALTER TABLE " + tempTable + " RENAME TO menus")
+
+				// Recreate indexes
+				db.Exec("CREATE INDEX IF NOT EXISTS idx_menus_tenant_id ON menus(tenant_id)")
+
+				log.Println("✅ Menu table migration completed")
+			}
+		}
+	}
+
 	return db.AutoMigrate(
 		&domain.Page{},
+		&domain.Menu{},
+		&domain.SystemConfig{},
 		// Add more models here as they are created
 	)
 }
@@ -165,8 +211,27 @@ func setupAPIRoutes(app *fiber.App, db *gorm.DB) {
 	v1.Post("/upload", uploadHandler.UploadFile)
 	v1.Post("/upload/from-url", uploadHandler.DownloadFromURL)
 
+	// Settings handler
+	settingsHandler := handler.NewSettingsHandler(db)
+	v1.Put("/settings", settingsHandler.UpdateSettings)
+
+	// Menu handler
+	menuHandler := handler.NewMenuHandler(db)
+	v1.Post("/menus", menuHandler.CreateMenu)
+	v1.Get("/menus", menuHandler.ListMenus)
+	v1.Get("/menus/:id", menuHandler.GetMenu)
+	v1.Put("/menus/:id", menuHandler.UpdateMenu)
+	v1.Delete("/menus/:id", menuHandler.DeleteMenu)
+
 	// Public API routes (no authentication required)
 	public := app.Group("/api/public")
+	// Set DB in context for public routes (community edition)
+	if !config.SupportsMultiTenancy() {
+		public.Use(middleware.DBMiddleware(db))
+	}
+	// Register specific routes BEFORE wildcard routes to avoid route conflicts
+	public.Get("/settings", settingsHandler.GetSettings)
+	public.Get("/menus/:id", menuHandler.GetMenu) // Public endpoint to get menu by ID
 	public.Get("/pages/*", pageHandler.GetPageBySlugPublic)
 }
 

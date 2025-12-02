@@ -103,7 +103,7 @@ export default function PageEdit() {
 
     try {
       await updatePromise
-      navigate('/pages')
+      navigate('/admin/pages')
     } catch (err: any) {
       const errorMsg = err.response?.data?.error || 'Failed to update page'
       setError(errorMsg)

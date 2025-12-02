@@ -1,0 +1,120 @@
+---
+import Hero from './blocks/Hero.astro';
+import Content from './blocks/Content.astro';
+import Image from './blocks/Image.astro';
+import Features from './blocks/Features.astro';
+import Pricing from './blocks/Pricing.astro';
+import FAQ from './blocks/FAQ.astro';
+import Testimonial from './blocks/Testimonial.astro';
+import Video from './blocks/Video.astro';
+import CTA from './blocks/CTA.astro';
+
+interface Block {
+  id: string;
+  type: 'hero' | 'text' | 'image' | 'features' | 'pricing' | 'faq' | 'testimonial' | 'video' | 'cta';
+  data: any;
+}
+
+interface Props {
+  block: Block;
+}
+
+const { block } = Astro.props;
+
+// Parse block data based on type
+let heroProps: any = {};
+let contentProps: any = {};
+let imageProps: any = {};
+let featuresProps: any = {};
+let pricingProps: any = {};
+let faqProps: any = {};
+let testimonialProps: any = {};
+let videoProps: any = {};
+let ctaProps: any = {};
+
+switch (block.type) {
+  case 'hero':
+    heroProps = {
+      title: block.data.title || '',
+      subtitle: block.data.subtitle,
+      image_url: block.data.image_url,
+    };
+    break;
+  
+  case 'text':
+    contentProps = {
+      content: block.data.content || '',
+      align: block.data.align || 'left',
+    };
+    break;
+  
+  case 'image':
+    imageProps = {
+      url: block.data.url || '',
+      alt: block.data.alt,
+      caption: block.data.caption,
+    };
+    break;
+  
+  case 'features':
+    featuresProps = {
+      title: block.data.title,
+      subtitle: block.data.subtitle,
+      items: block.data.items || [],
+      columns: block.data.columns || 3,
+    };
+    break;
+  
+  case 'pricing':
+    pricingProps = {
+      title: block.data.title,
+      subtitle: block.data.subtitle,
+      plans: block.data.plans || [],
+    };
+    break;
+  
+  case 'faq':
+    faqProps = {
+      title: block.data.title,
+      items: block.data.items || [],
+    };
+    break;
+  
+  case 'testimonial':
+    testimonialProps = {
+      title: block.data.title,
+      subtitle: block.data.subtitle,
+      testimonials: block.data.testimonials || [],
+    };
+    break;
+  
+  case 'video':
+    videoProps = {
+      url: block.data.url || '',
+      title: block.data.title,
+      description: block.data.description,
+    };
+    break;
+  
+  case 'cta':
+    ctaProps = {
+      title: block.data.title || '',
+      subtitle: block.data.subtitle,
+      button_text: block.data.button_text || '',
+      button_url: block.data.button_url || '',
+      button_style: block.data.button_style || 'primary',
+      background: block.data.background,
+    };
+    break;
+}
+---
+
+{block.type === 'hero' && <Hero {...heroProps} />}
+{block.type === 'text' && <Content {...contentProps} />}
+{block.type === 'image' && <Image {...imageProps} />}
+{block.type === 'features' && <Features {...featuresProps} />}
+{block.type === 'pricing' && <Pricing {...pricingProps} />}
+{block.type === 'faq' && <FAQ {...faqProps} />}
+{block.type === 'testimonial' && <Testimonial {...testimonialProps} />}
+{block.type === 'video' && <Video {...videoProps} />}
+{block.type === 'cta' && <CTA {...ctaProps} />}

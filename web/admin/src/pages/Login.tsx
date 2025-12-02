@@ -16,7 +16,7 @@ export default function Login() {
   // Redirect to dashboard if already authenticated
   useEffect(() => {
     if (!authLoading && user) {
-      navigate('/', { replace: true })
+      navigate('/admin', { replace: true })
     }
   }, [user, authLoading, navigate])
 
@@ -28,7 +28,7 @@ export default function Login() {
     try {
       await login(email, password)
       toast.success('Login successful!')
-      navigate('/')
+      navigate('/admin')
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Login failed'
       setError(errorMsg)

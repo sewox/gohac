@@ -1,0 +1,39 @@
+---
+interface Props {
+  title: string;
+  subtitle?: string;
+  button_text: string;
+  button_url: string;
+  button_style?: 'primary' | 'secondary' | 'outline';
+  background?: string;
+}
+
+const { title, subtitle, button_text, button_url, button_style = 'primary', background } = Astro.props;
+
+const buttonClasses = {
+  primary: 'bg-blue-600 text-white hover:bg-blue-700',
+  secondary: 'bg-gray-700 text-white hover:bg-gray-600',
+  outline: 'bg-transparent border-2 border-blue-500 text-blue-400 hover:bg-blue-900/30',
+}[button_style];
+
+const bgStyle = background ? `background: ${background};` : '';
+const defaultBg = 'background: linear-gradient(135deg, #1f2937 0%, #111827 50%, #000000 100%);';
+---
+
+<section class="py-16 md:py-24 text-white" style={bgStyle || defaultBg}>
+  <div class="container mx-auto px-4">
+    <div class="max-w-3xl mx-auto text-center">
+      <h2 class="text-3xl md:text-5xl font-bold mb-6">{title}</h2>
+      {subtitle && (
+        <p class="text-xl mb-8 opacity-90">{subtitle}</p>
+      )}
+      <a 
+        href={button_url}
+        class={`inline-block px-8 py-4 rounded-lg font-semibold text-lg transition-colors ${buttonClasses}`}
+      >
+        {button_text}
+      </a>
+    </div>
+  </div>
+</section>
+

@@ -1,0 +1,69 @@
+---
+import Layout from '../layouts/Layout.astro';
+import BlockRenderer from '../components/BlockRenderer.astro';
+
+interface Page {
+  id: string;
+  slug: string;
+  title: string;
+  blocks?: any[];
+  status: string;
+}
+
+// Mark this route as dynamic (not prerendered)
+export const prerender = false;
+
+// Try to load 'home' page, if not found, redirect to 404
+const API_BASE_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3131';
+
+// Add preview=true to allow viewing draft pages
+// Backend will handle preview token validation if needed in the future
+const previewParam = '?preview=true';
+
+let page: Page | null = null;
+let error: string | null = null;
+
+try {
+  const response = await fetch(`${API_BASE_URL}/api/public/pages/home${previewParam}`);
+  
+  if (response.status === 404) {
+    return Astro.redirect('/404');
+  }
+  
+  if (!response.ok) {
+    error = `Failed to load page: ${response.statusText}`;
+  } else {
+    page = await response.json();
+  }
+} catch (err) {
+  console.error('Error fetching home page:', err);
+  error = err instanceof Error ? err.message : 'Failed to load page';
+}
+
+if (error || !page) {
+  return Astro.redirect('/404');
+}
+
+// Parse blocks from JSON if it's a string
+let blocks: any[] = [];
+if (page.blocks) {
+  if (typeof page.blocks === 'string') {
+    try {
+      blocks = JSON.parse(page.blocks);
+    } catch (e) {
+      blocks = [];
+    }
+  } else if (Array.isArray(page.blocks)) {
+    blocks = page.blocks;
+  }
+}
+---
+
+<Layout title={page.title}>
+  <main>
+    {blocks.map((block) => (
+      <BlockRenderer block={block} />
+    ))}
+  </main>
+</Layout>
+

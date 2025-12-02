@@ -21,22 +21,22 @@ export default function Layout({ children }: LayoutProps) {
 
         <nav className="sidebar-nav">
           <Link
-            to="/"
-            className={`nav-item ${location.pathname === '/' ? 'active' : ''}`}
+            to="/admin"
+            className={`nav-item ${location.pathname === '/admin' ? 'active' : ''}`}
           >
             <LayoutDashboard size={20} />
             <span>Dashboard</span>
           </Link>
           <Link
-            to="/pages"
-            className={`nav-item ${location.pathname.startsWith('/pages') ? 'active' : ''}`}
+            to="/admin/pages"
+            className={`nav-item ${location.pathname.startsWith('/admin/pages') ? 'active' : ''}`}
           >
             <FileText size={20} />
             <span>Pages</span>
           </Link>
           <Link
-            to="/settings"
-            className={`nav-item ${location.pathname === '/settings' ? 'active' : ''}`}
+            to="/admin/settings"
+            className={`nav-item ${location.pathname === '/admin/settings' ? 'active' : ''}`}
           >
             <Settings size={20} />
             <span>Settings</span>

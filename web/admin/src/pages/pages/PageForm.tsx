@@ -30,7 +30,7 @@ export default function PageForm() {
 
     try {
       await createPromise
-      navigate('/pages')
+      navigate('/admin/pages')
     } catch (err: any) {
       const errorMsg = err.response?.data?.error || 'Failed to create page'
       setError(errorMsg)

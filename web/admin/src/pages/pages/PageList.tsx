@@ -119,7 +119,7 @@ export default function PageList() {
           <FileText size={24} />
           <h1>Pages</h1>
         </div>
-        <Link to="/pages/new" className="create-button">
+        <Link to="/admin/pages/new" className="create-button">
           <Plus size={20} />
           <span>Create New Page</span>
         </Link>
@@ -130,7 +130,7 @@ export default function PageList() {
           <FileText size={48} />
           <h2>No pages yet</h2>
           <p>Create your first page to get started</p>
-          <Link to="/pages/new" className="create-button">
+          <Link to="/admin/pages/new" className="create-button">
             <Plus size={20} />
             <span>Create Page</span>
           </Link>
@@ -166,7 +166,7 @@ export default function PageList() {
                   </td>
                   <td className="actions-cell">
                     <Link
-                      to={`/pages/${page.id}/edit`}
+                      to={`/admin/pages/${page.id}/edit`}
                       className="action-button edit"
                       title="Edit"
                     >

@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"strconv"
+	"strings"
 
 	"gohac/internal/adapter/database"
 	"gohac/internal/adapter/repository"
@@ -372,4 +373,58 @@ func (h *PageHandler) DeletePage(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusNoContent).Send(nil)
+}
+
+// GetPageBySlugPublic handles GET /api/public/pages/* (public endpoint, no auth required)
+func (h *PageHandler) GetPageBySlugPublic(c *fiber.Ctx) error {
+	// Get slug from wildcard parameter
+	slug := c.Params("*")
+	// Remove leading slash if present
+	if len(slug) > 0 && slug[0] == '/' {
+		slug = slug[1:]
+	}
+	if slug == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Slug is required",
+			"code":  fiber.StatusBadRequest,
+		})
+	}
+
+	// Get database from context (fallback to handler's DB)
+	db, err := database.GetDBFromContext(c.Context())
+	if err != nil {
+		// Fallback to handler's DB for community edition
+		db = h.db
+	}
+
+	repo := repository.NewPageRepository(db)
+
+	// Get page by slug
+	page, err := repo.GetBySlug(c.Context(), slug)
+	if err != nil {
+		// Check if error contains "page not found" (repository wraps gorm.ErrRecordNotFound)
+		if strings.Contains(err.Error(), "page not found") {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "Page not found",
+				"code":  fiber.StatusNotFound,
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to get page: " + err.Error(),
+			"code":  fiber.StatusInternalServerError,
+		})
+	}
+
+	// Check if page is published (unless preview=true query param is present)
+	preview := c.Query("preview") == "true"
+	if page.Status != domain.PageStatusPublished && !preview {
+		// Return 404 if page is not published (security: don't reveal draft pages)
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "Page not found or not published",
+			"code":  fiber.StatusNotFound,
+			"hint":  "Page exists but status is '" + string(page.Status) + "'. Use ?preview=true to view draft pages.",
+		})
+	}
+
+	return c.JSON(page)
 }

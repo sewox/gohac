@@ -1,0 +1,30 @@
+---
+interface Props {
+  title: string;
+  subtitle?: string;
+  image_url?: string;
+}
+
+const { title, subtitle, image_url } = Astro.props;
+---
+
+<section class="relative bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white py-20 md:py-32">
+  <div class="container mx-auto px-4">
+    <div class="max-w-4xl mx-auto text-center">
+      <h1 class="text-4xl md:text-6xl font-bold mb-6">{title}</h1>
+      {subtitle && (
+        <p class="text-xl md:text-2xl text-blue-100 mb-8">{subtitle}</p>
+      )}
+      {image_url && (
+        <div class="mt-12">
+          <img 
+            src={image_url} 
+            alt={title}
+            class="max-w-full h-auto rounded-lg shadow-2xl mx-auto"
+          />
+        </div>
+      )}
+    </div>
+  </div>
+</section>
+

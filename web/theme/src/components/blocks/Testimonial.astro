@@ -1,0 +1,51 @@
+---
+interface Props {
+  title?: string;
+  subtitle?: string;
+  testimonials: Array<{
+    quote: string;
+    author: string;
+    avatar_url?: string;
+    role?: string;
+  }>;
+}
+
+const { title, subtitle, testimonials = [] } = Astro.props;
+---
+
+<section class="py-16 md:py-24 bg-gray-900">
+  <div class="container mx-auto px-4">
+    {(title || subtitle) && (
+      <div class="text-center mb-12">
+        {title && <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">{title}</h2>}
+        {subtitle && <p class="text-xl text-gray-300">{subtitle}</p>}
+      </div>
+    )}
+    
+    {testimonials.length > 0 && (
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        {testimonials.map((testimonial) => (
+          <div class="bg-gray-800 rounded-lg p-6 shadow-md border border-gray-700">
+            <p class="text-gray-200 mb-6 italic">"{testimonial.quote}"</p>
+            <div class="flex items-center">
+              {testimonial.avatar_url && (
+                <img 
+                  src={testimonial.avatar_url} 
+                  alt={testimonial.author}
+                  class="w-12 h-12 rounded-full mr-4 border-2 border-gray-600"
+                />
+              )}
+              <div>
+                <p class="font-semibold text-white">{testimonial.author}</p>
+                {testimonial.role && (
+                  <p class="text-sm text-gray-400">{testimonial.role}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+</section>
+

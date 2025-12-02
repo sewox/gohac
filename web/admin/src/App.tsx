@@ -15,11 +15,11 @@ function App() {
       <BrowserRouter>
         <Routes>
           {/* Public route */}
-          <Route path="/login" element={<Login />} />
+          <Route path="/admin/login" element={<Login />} />
 
           {/* Protected routes */}
           <Route
-            path="/"
+            path="/admin"
             element={
               <RequireAuth>
                 <Layout>
@@ -30,7 +30,7 @@ function App() {
           />
 
           <Route
-            path="/pages"
+            path="/admin/pages"
             element={
               <RequireAuth>
                 <Layout>
@@ -41,7 +41,7 @@ function App() {
           />
 
           <Route
-            path="/pages/new"
+            path="/admin/pages/new"
             element={
               <RequireAuth>
                 <Layout>
@@ -52,7 +52,7 @@ function App() {
           />
 
           <Route
-            path="/pages/:id/edit"
+            path="/admin/pages/:id/edit"
             element={
               <RequireAuth>
                 <Layout>
@@ -62,8 +62,11 @@ function App() {
             }
           />
 
-          {/* Redirect unknown routes to home */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          {/* Redirect root to admin */}
+          <Route path="/" element={<Navigate to="/admin" replace />} />
+
+          {/* Redirect unknown routes to admin */}
+          <Route path="*" element={<Navigate to="/admin" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

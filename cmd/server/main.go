@@ -160,6 +160,10 @@ func setupAPIRoutes(app *fiber.App, db *gorm.DB) {
 	uploadHandler := handler.NewUploadHandler()
 	v1.Post("/upload", uploadHandler.UploadFile)
 	v1.Post("/upload/from-url", uploadHandler.DownloadFromURL)
+
+	// Public API routes (no authentication required)
+	public := app.Group("/api/public")
+	public.Get("/pages/*", pageHandler.GetPageBySlugPublic)
 }
 
 // errorHandler is the global error handler

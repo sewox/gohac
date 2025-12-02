@@ -15,8 +15,8 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // Only redirect if not already on login page to avoid redirect loops
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login'
+      if (window.location.pathname !== '/admin/login') {
+        window.location.href = '/admin/login'
       }
     }
     return Promise.reject(error)

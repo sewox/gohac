@@ -1,4 +1,5 @@
 import { ReactNode } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { LogOut, LayoutDashboard, FileText, Settings } from 'lucide-react'
 import './Layout.css'
@@ -9,6 +10,7 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const { user, logout } = useAuth()
+  const location = useLocation()
 
   return (
     <div className="layout">
@@ -18,18 +20,27 @@ export default function Layout({ children }: LayoutProps) {
         </div>
 
         <nav className="sidebar-nav">
-          <a href="/" className="nav-item active">
+          <Link
+            to="/"
+            className={`nav-item ${location.pathname === '/' ? 'active' : ''}`}
+          >
             <LayoutDashboard size={20} />
             <span>Dashboard</span>
-          </a>
-          <a href="/pages" className="nav-item">
+          </Link>
+          <Link
+            to="/pages"
+            className={`nav-item ${location.pathname.startsWith('/pages') ? 'active' : ''}`}
+          >
             <FileText size={20} />
             <span>Pages</span>
-          </a>
-          <a href="/settings" className="nav-item">
+          </Link>
+          <Link
+            to="/settings"
+            className={`nav-item ${location.pathname === '/settings' ? 'active' : ''}`}
+          >
             <Settings size={20} />
             <span>Settings</span>
-          </a>
+          </Link>
         </nav>
 
         <div className="sidebar-footer">

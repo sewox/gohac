@@ -4,6 +4,7 @@ import Layout from './components/Layout'
 import RequireAuth from './components/RequireAuth'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
+import PageList from './pages/pages/PageList'
 import './App.css'
 
 function App() {
@@ -21,6 +22,17 @@ function App() {
               <RequireAuth>
                 <Layout>
                   <Dashboard />
+                </Layout>
+              </RequireAuth>
+            }
+          />
+
+          <Route
+            path="/pages"
+            element={
+              <RequireAuth>
+                <Layout>
+                  <PageList />
                 </Layout>
               </RequireAuth>
             }

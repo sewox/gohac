@@ -134,17 +134,20 @@ func setupAPIRoutes(app *fiber.App, db *gorm.DB) {
 	v1 := api.Group("/v1")
 	v1.Use(middleware.Protected()) // Apply auth middleware to all v1 routes
 
-	// Pages endpoint (protected)
-	v1.Get("/pages", func(c *fiber.Ctx) error {
-		userID := c.Locals("user_id")
-		tenantID := c.Locals("tenant_id")
+	// Set DB in context for community edition (enterprise uses TenantMiddleware)
+	if !config.SupportsMultiTenancy() {
+		v1.Use(middleware.DBMiddleware(db))
+	}
 
-		return c.JSON(fiber.Map{
-			"message":   "Pages API endpoint",
-			"user_id":   userID,
-			"tenant_id": tenantID,
-		})
-	})
+	// Create page handler
+	pageHandler := handler.NewPageHandler(db)
+
+	// Page routes
+	v1.Post("/pages", pageHandler.CreatePage)
+	v1.Get("/pages", pageHandler.ListPages)
+	v1.Get("/pages/:id", pageHandler.GetPage)
+	v1.Put("/pages/:id", pageHandler.UpdatePage)
+	v1.Delete("/pages/:id", pageHandler.DeletePage)
 }
 
 // errorHandler is the global error handler

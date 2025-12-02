@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { LogIn } from 'lucide-react'
@@ -9,8 +9,15 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const { login } = useAuth()
+  const { login, user, loading: authLoading } = useAuth()
   const navigate = useNavigate()
+
+  // Redirect to dashboard if already authenticated
+  useEffect(() => {
+    if (!authLoading && user) {
+      navigate('/', { replace: true })
+    }
+  }, [user, authLoading, navigate])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,6 +32,26 @@ export default function Login() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <div className="login-page">
+        <div className="login-container">
+          <div className="login-card">
+            <div style={{ textAlign: 'center', padding: '40px' }}>
+              <p>Loading...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Don't render login form if user is already authenticated
+  if (user) {
+    return null
   }
 
   return (

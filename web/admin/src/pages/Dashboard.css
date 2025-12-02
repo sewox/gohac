@@ -1,0 +1,122 @@
+.dashboard {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.dashboard-header {
+  margin-bottom: 32px;
+}
+
+.dashboard-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dashboard-title h1 {
+  font-size: 28px;
+  color: #1a202c;
+  margin: 0;
+}
+
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.welcome-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 40px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.welcome-icon {
+  margin-bottom: 16px;
+  opacity: 0.9;
+}
+
+.welcome-card h2 {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.welcome-message {
+  font-size: 18px;
+  margin-bottom: 24px;
+  opacity: 0.95;
+}
+
+.user-info-card {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.user-info-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 16px 24px;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+}
+
+.user-info-item div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-info-item .label {
+  font-size: 12px;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.user-info-item .value {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.stat-card {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+}
+
+.stat-card h3 {
+  font-size: 14px;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+.stat-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0 0 4px 0;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #718096;
+  margin: 0;
+}
+

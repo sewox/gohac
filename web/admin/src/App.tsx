@@ -5,6 +5,8 @@ import RequireAuth from './components/RequireAuth'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import PageList from './pages/pages/PageList'
+import PageForm from './pages/pages/PageForm'
+import PageEdit from './pages/pages/PageEdit'
 import './App.css'
 
 function App() {
@@ -33,6 +35,28 @@ function App() {
               <RequireAuth>
                 <Layout>
                   <PageList />
+                </Layout>
+              </RequireAuth>
+            }
+          />
+
+          <Route
+            path="/pages/new"
+            element={
+              <RequireAuth>
+                <Layout>
+                  <PageForm />
+                </Layout>
+              </RequireAuth>
+            }
+          />
+
+          <Route
+            path="/pages/:id/edit"
+            element={
+              <RequireAuth>
+                <Layout>
+                  <PageEdit />
                 </Layout>
               </RequireAuth>
             }

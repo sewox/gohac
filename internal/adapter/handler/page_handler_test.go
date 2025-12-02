@@ -249,3 +249,71 @@ func TestPageHandler_DeletePage(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "not found")
 }
+
+func TestPageHandler_UpdatePage_WithBlocks(t *testing.T) {
+	app, db := setupTestApp(t)
+
+	// Create a page first
+	repo := repository.NewPageRepository(db)
+	ctx := database.SetDBInContext(context.Background(), db)
+
+	page := &domain.Page{
+		Slug:   "blocks-test",
+		Title:  "Blocks Test Page",
+		Status: domain.PageStatusDraft,
+	}
+	err := repo.Create(ctx, page)
+	require.NoError(t, err)
+
+	// Update the page with blocks
+	blocks := []domain.Block{
+		{
+			ID:   "block-1",
+			Type: "hero",
+			Data: json.RawMessage(`{"title":"Hello","subtitle":"World"}`),
+		},
+	}
+
+	updateReq := UpdatePageRequest{
+		Title:  "Updated Title",
+		Blocks: blocks,
+	}
+
+	body, err := json.Marshal(updateReq)
+	require.NoError(t, err)
+
+	req := httptest.NewRequest("PUT", "/api/v1/pages/"+page.ID.String(), bytes.NewBuffer(body))
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := app.Test(req)
+	require.NoError(t, err)
+
+	assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+
+	var updatedPage domain.Page
+	err = json.NewDecoder(resp.Body).Decode(&updatedPage)
+	require.NoError(t, err)
+	assert.Equal(t, "Updated Title", updatedPage.Title)
+
+	// Verify blocks were saved
+	var savedBlocks []domain.Block
+	err = json.Unmarshal(updatedPage.Blocks, &savedBlocks)
+	require.NoError(t, err)
+	assert.Len(t, savedBlocks, 1)
+	assert.Equal(t, "hero", savedBlocks[0].Type)
+
+	// Verify block data
+	var heroData domain.HeroBlockData
+	err = json.Unmarshal(savedBlocks[0].Data, &heroData)
+	require.NoError(t, err)
+	assert.Equal(t, "Hello", heroData.Title)
+	assert.Equal(t, "World", heroData.Subtitle)
+
+	// Verify in database
+	dbPage, err := repo.GetByID(ctx, page.ID)
+	require.NoError(t, err)
+	var dbBlocks []domain.Block
+	err = json.Unmarshal(dbPage.Blocks, &dbBlocks)
+	require.NoError(t, err)
+	assert.Len(t, dbBlocks, 1)
+	assert.Equal(t, "hero", dbBlocks[0].Type)
+}

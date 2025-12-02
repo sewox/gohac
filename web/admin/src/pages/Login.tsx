@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { LogIn } from 'lucide-react'
+import toast from 'react-hot-toast'
 import './Login.css'
 
 export default function Login() {
@@ -26,9 +27,12 @@ export default function Login() {
 
     try {
       await login(email, password)
+      toast.success('Login successful!')
       navigate('/')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed')
+      const errorMsg = err instanceof Error ? err.message : 'Login failed'
+      setError(errorMsg)
+      toast.error(errorMsg)
     } finally {
       setLoading(false)
     }

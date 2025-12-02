@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Plus, Edit, Trash2, FileText } from 'lucide-react'
+import toast from 'react-hot-toast'
 import { pagesAPI } from '../../lib/api'
+import ConfirmDialog from '../../components/ConfirmDialog'
 import './PageList.css'
 
 interface Page {
@@ -17,6 +19,15 @@ export default function PageList() {
   const [pages, setPages] = useState<Page[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    isOpen: boolean
+    pageId: string | null
+    pageTitle: string
+  }>({
+    isOpen: false,
+    pageId: null,
+    pageTitle: '',
+  })
 
   useEffect(() => {
     fetchPages()
@@ -29,23 +40,44 @@ export default function PageList() {
       setPages(response.data.data || [])
       setError(null)
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to load pages')
+      const errorMsg = err.response?.data?.error || 'Failed to load pages'
+      setError(errorMsg)
+      toast.error(errorMsg)
     } finally {
       setLoading(false)
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this page?')) {
-      return
-    }
+  const handleDeleteClick = (id: string, title: string) => {
+    setDeleteConfirm({
+      isOpen: true,
+      pageId: id,
+      pageTitle: title,
+    })
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteConfirm.pageId) return
+
+    const deletePromise = pagesAPI.delete(deleteConfirm.pageId)
+
+    toast.promise(deletePromise, {
+      loading: 'Deleting page...',
+      success: 'Page deleted successfully',
+      error: (err: any) => err.response?.data?.error || 'Failed to delete page',
+    })
 
     try {
-      await pagesAPI.delete(id)
+      await deletePromise
+      setDeleteConfirm({ isOpen: false, pageId: null, pageTitle: '' })
       fetchPages() // Refresh list
-    } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to delete page')
+    } catch (err) {
+      // Error already handled by toast.promise
     }
+  }
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirm({ isOpen: false, pageId: null, pageTitle: '' })
   }
 
   const getStatusBadgeClass = (status: string) => {
@@ -141,7 +173,7 @@ export default function PageList() {
                       <Edit size={16} />
                     </Link>
                     <button
-                      onClick={() => handleDelete(page.id)}
+                      onClick={() => handleDeleteClick(page.id, page.title)}
                       className="action-button delete"
                       title="Delete"
                     >
@@ -154,6 +186,17 @@ export default function PageList() {
           </table>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={deleteConfirm.isOpen}
+        title="Delete Page"
+        message={`Are you sure you want to delete "${deleteConfirm.pageTitle}"? This action cannot be undone.`}
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </div>
   )
 }

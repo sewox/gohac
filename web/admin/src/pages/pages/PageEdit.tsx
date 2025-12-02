@@ -3,13 +3,17 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Save } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { pagesAPI } from '../../lib/api'
+import BlockEditor from '../../components/editor/BlockEditor'
+import { Block } from '../../types/block'
 import './PageForm.css'
+import './PageEdit.css'
 
 interface Page {
   id: string
   slug: string
   title: string
   status: 'draft' | 'published' | 'archived'
+  blocks?: Block[]
 }
 
 export default function PageEdit() {
@@ -20,6 +24,7 @@ export default function PageEdit() {
     title: '',
     status: 'draft' as 'draft' | 'published' | 'archived',
   })
+  const [blocks, setBlocks] = useState<Block[]>([])
   const [loading, setLoading] = useState(false)
   const [fetching, setFetching] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -40,6 +45,34 @@ export default function PageEdit() {
         title: page.title,
         status: page.status,
       })
+
+      // Parse blocks from JSON
+      if (page.blocks) {
+        try {
+          let parsedBlocks: Block[] = []
+          if (Array.isArray(page.blocks)) {
+            parsedBlocks = page.blocks
+          } else if (typeof page.blocks === 'string') {
+            parsedBlocks = JSON.parse(page.blocks)
+          } else {
+            // Already parsed object
+            parsedBlocks = page.blocks as any
+          }
+          // Ensure all blocks have required fields
+          parsedBlocks = parsedBlocks.map((block) => ({
+            id: block.id || `block-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            type: block.type,
+            data: block.data || {},
+          }))
+          setBlocks(parsedBlocks)
+        } catch (e) {
+          console.error('Failed to parse blocks:', e)
+          setBlocks([])
+        }
+      } else {
+        setBlocks([])
+      }
+
       setError(null)
     } catch (err: any) {
       const errorMsg = err.response?.data?.error || 'Failed to load page'
@@ -55,7 +88,12 @@ export default function PageEdit() {
     setError(null)
     setLoading(true)
 
-    const updatePromise = pagesAPI.update(id!, formData)
+    const updateData = {
+      ...formData,
+      blocks,
+    }
+
+    const updatePromise = pagesAPI.update(id!, updateData)
 
     toast.promise(updatePromise, {
       loading: 'Updating page...',
@@ -139,6 +177,11 @@ export default function PageEdit() {
             <option value="published">Published</option>
             <option value="archived">Archived</option>
           </select>
+        </div>
+
+        <div className="form-group">
+          <label>Content Blocks</label>
+          <BlockEditor initialBlocks={blocks} onChange={setBlocks} />
         </div>
 
         <div className="form-actions">

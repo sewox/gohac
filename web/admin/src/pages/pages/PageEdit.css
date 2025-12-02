@@ -1,0 +1,11 @@
+/* Additional styles for PageEdit with BlockEditor */
+.page-form .form-group:has(.block-editor-container) {
+  margin-bottom: 32px;
+}
+
+.page-form .form-group label:has(+ .block-editor-container) {
+  margin-bottom: 16px;
+  font-size: 16px;
+  font-weight: 600;
+}
+

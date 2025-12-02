@@ -5,12 +5,13 @@ import (
 
 	"github.com/google/uuid"
 	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
 // Page represents a content page in the CMS
 // Uses JSONB blocks for flexible, schema-less content structure
 type Page struct {
-	ID          uuid.UUID      `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
+	ID          uuid.UUID      `gorm:"type:uuid;primary_key" json:"id"`
 	TenantID    string         `gorm:"index;not null" json:"tenant_id"` // Empty string for community edition
 	Slug        string         `gorm:"index;not null" json:"slug"`
 	Title       string         `gorm:"not null" json:"title"`
@@ -20,6 +21,15 @@ type Page struct {
 	CreatedAt   time.Time      `json:"created_at"`
 	UpdatedAt   time.Time      `json:"updated_at"`
 	PublishedAt *time.Time     `json:"published_at,omitempty"`
+}
+
+// BeforeCreate is a GORM hook that generates UUID before creating a page
+// This ensures SQLite compatibility (SQLite doesn't have gen_random_uuid())
+func (p *Page) BeforeCreate(tx *gorm.DB) error {
+	if p.ID == uuid.Nil {
+		p.ID = uuid.New()
+	}
+	return nil
 }
 
 // PageStatus represents the publication status of a page

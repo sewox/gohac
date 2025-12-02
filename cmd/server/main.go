@@ -6,6 +6,7 @@ import (
 
 	"gohac/config"
 	"gohac/internal/adapter/database"
+	"gohac/internal/adapter/handler"
 	"gohac/internal/core/domain"
 	"gohac/internal/middleware"
 
@@ -72,7 +73,7 @@ func main() {
 		})
 	})
 
-	// API routes (will be expanded later)
+	// Setup API routes
 	setupAPIRoutes(app, db)
 
 	// Start server
@@ -101,13 +102,25 @@ func migrateDatabase(db *gorm.DB) error {
 
 // setupAPIRoutes sets up API route handlers
 func setupAPIRoutes(app *fiber.App, db *gorm.DB) {
-	api := app.Group("/api/v1")
+	api := app.Group("/api")
 
-	// Placeholder API route
-	api.Get("/pages", func(c *fiber.Ctx) error {
+	// Public auth routes
+	auth := api.Group("/auth")
+	auth.Post("/login", handler.Login)
+
+	// Protected routes (require authentication)
+	v1 := api.Group("/v1")
+	v1.Use(middleware.Protected()) // Apply auth middleware to all v1 routes
+
+	// Pages endpoint (protected)
+	v1.Get("/pages", func(c *fiber.Ctx) error {
+		userID := c.Locals("user_id")
+		tenantID := c.Locals("tenant_id")
+
 		return c.JSON(fiber.Map{
-			"message":   "Pages API endpoint - coming soon",
-			"tenant_id": c.Locals("tenant_id"),
+			"message":   "Pages API endpoint",
+			"user_id":   userID,
+			"tenant_id": tenantID,
 		})
 	})
 }

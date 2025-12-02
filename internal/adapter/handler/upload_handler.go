@@ -24,7 +24,7 @@ func NewUploadHandler() *UploadHandler {
 	// Get base URL from environment or use default
 	baseURL := os.Getenv("STORAGE_BASE_URL")
 	if baseURL == "" {
-		baseURL = "/static"
+		baseURL = "/uploads" // Changed from /static to /uploads for cleaner URLs
 	}
 
 	st := storage.NewStorage(basePath, baseURL)

@@ -95,7 +95,11 @@ func main() {
 	if storagePath == "" {
 		storagePath = "./storage"
 	}
+	// Serve static files from storage directory
+	// This allows accessing uploaded files via /static/uploads/images/filename.jpg
 	app.Static("/static", storagePath)
+	// Also serve from /uploads for convenience (redirects to /static/uploads)
+	app.Static("/uploads", storagePath+"/uploads")
 
 	// Setup API routes
 	setupAPIRoutes(app, db)

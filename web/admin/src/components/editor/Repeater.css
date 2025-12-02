@@ -1,0 +1,96 @@
+.repeater {
+  margin-top: 8px;
+}
+
+.repeater-empty {
+  text-align: center;
+  padding: 24px;
+  background-color: #f7fafc;
+  border: 2px dashed #e2e8f0;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.repeater-empty p {
+  margin: 0;
+  color: #718096;
+  font-size: 14px;
+}
+
+.repeater-items {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.repeater-item {
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.repeater-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #f7fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.repeater-item-number {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4a5568;
+  background-color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.repeater-remove-button {
+  padding: 4px 8px;
+  background: transparent;
+  border: 1px solid #fcc;
+  border-radius: 4px;
+  color: #e53e3e;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.repeater-remove-button:hover {
+  background-color: #fee;
+  border-color: #f99;
+}
+
+.repeater-item-content {
+  padding: 16px;
+}
+
+.repeater-add-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: white;
+  border: 2px dashed #cbd5e0;
+  border-radius: 8px;
+  color: #4a5568;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+  width: 100%;
+  justify-content: center;
+}
+
+.repeater-add-button:hover {
+  background-color: #f7fafc;
+  border-color: #667eea;
+  border-style: solid;
+  color: #667eea;
+}
+

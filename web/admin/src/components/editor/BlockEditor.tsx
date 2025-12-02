@@ -24,7 +24,7 @@ export default function BlockEditor({
     onChange(blocks)
   }, [blocks, onChange])
 
-  const addBlock = (type: 'hero' | 'text' | 'image') => {
+  const addBlock = (type: Block['type']) => {
     const newBlock: Block = {
       id: `block-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       type,
@@ -33,9 +33,7 @@ export default function BlockEditor({
     setBlocks([...blocks, newBlock])
   }
 
-  const getDefaultDataForType = (
-    type: 'hero' | 'text' | 'image'
-  ): Block['data'] => {
+  const getDefaultDataForType = (type: Block['type']): Block['data'] => {
     switch (type) {
       case 'hero':
         return { title: '', subtitle: '' }
@@ -43,6 +41,18 @@ export default function BlockEditor({
         return { content: '' }
       case 'image':
         return { url: '', alt: '' }
+      case 'features':
+        return { items: [], columns: 3 }
+      case 'pricing':
+        return { plans: [] }
+      case 'faq':
+        return { items: [] }
+      case 'testimonial':
+        return { testimonials: [] }
+      case 'video':
+        return { url: '' }
+      case 'cta':
+        return { title: '', button_text: '', button_url: '' }
     }
   }
 
@@ -179,6 +189,90 @@ export default function BlockEditor({
                   <div>
                     <div className="block-type-name">Image</div>
                     <div className="block-type-desc">Image with caption</div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    addBlock('features')
+                    setShowAddMenu(false)
+                  }}
+                  className="add-block-option"
+                >
+                  <span className="block-type-icon">✨</span>
+                  <div>
+                    <div className="block-type-name">Features</div>
+                    <div className="block-type-desc">Grid of feature items</div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    addBlock('pricing')
+                    setShowAddMenu(false)
+                  }}
+                  className="add-block-option"
+                >
+                  <span className="block-type-icon">💰</span>
+                  <div>
+                    <div className="block-type-name">Pricing</div>
+                    <div className="block-type-desc">Pricing plans</div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    addBlock('faq')
+                    setShowAddMenu(false)
+                  }}
+                  className="add-block-option"
+                >
+                  <span className="block-type-icon">❓</span>
+                  <div>
+                    <div className="block-type-name">FAQ</div>
+                    <div className="block-type-desc">Questions and answers</div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    addBlock('testimonial')
+                    setShowAddMenu(false)
+                  }}
+                  className="add-block-option"
+                >
+                  <span className="block-type-icon">💬</span>
+                  <div>
+                    <div className="block-type-name">Testimonial</div>
+                    <div className="block-type-desc">Customer reviews</div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    addBlock('video')
+                    setShowAddMenu(false)
+                  }}
+                  className="add-block-option"
+                >
+                  <span className="block-type-icon">🎥</span>
+                  <div>
+                    <div className="block-type-name">Video</div>
+                    <div className="block-type-desc">Video embed</div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    addBlock('cta')
+                    setShowAddMenu(false)
+                  }}
+                  className="add-block-option"
+                >
+                  <span className="block-type-icon">🚀</span>
+                  <div>
+                    <div className="block-type-name">Call to Action</div>
+                    <div className="block-type-desc">CTA section</div>
                   </div>
                 </button>
               </div>

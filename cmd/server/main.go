@@ -90,6 +90,13 @@ func main() {
 		})
 	})
 
+	// Static file serving for uploaded files
+	storagePath := os.Getenv("STORAGE_PATH")
+	if storagePath == "" {
+		storagePath = "./storage"
+	}
+	app.Static("/static", storagePath)
+
 	// Setup API routes
 	setupAPIRoutes(app, db)
 
@@ -148,6 +155,11 @@ func setupAPIRoutes(app *fiber.App, db *gorm.DB) {
 	v1.Get("/pages/:id", pageHandler.GetPage)
 	v1.Put("/pages/:id", pageHandler.UpdatePage)
 	v1.Delete("/pages/:id", pageHandler.DeletePage)
+
+	// Upload handler
+	uploadHandler := handler.NewUploadHandler()
+	v1.Post("/upload", uploadHandler.UploadFile)
+	v1.Post("/upload/from-url", uploadHandler.DownloadFromURL)
 }
 
 // errorHandler is the global error handler

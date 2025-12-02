@@ -79,7 +79,11 @@
   font-size: 12px;
 }
 
-.image-preview {
+/* Image preview styles moved to ImageUpload.css */
+
+/* Avatar preview styles moved to ImageUpload.css */
+
+.video-preview {
   margin-top: 16px;
   padding: 12px;
   background-color: #f7fafc;
@@ -87,9 +91,80 @@
   border: 1px solid #e2e8f0;
 }
 
-.image-preview img {
-  max-width: 100%;
-  height: auto;
+.video-preview p {
+  margin: 0 0 8px 0;
+  font-size: 12px;
+  color: #718096;
+  font-weight: 600;
+}
+
+.video-preview-placeholder {
+  padding: 40px;
+  background-color: white;
+  border: 2px dashed #e2e8f0;
   border-radius: 4px;
+  text-align: center;
+  color: #a0aec0;
+  font-size: 14px;
+}
+
+.feature-item-form,
+.faq-item-form,
+.testimonial-item-form,
+.pricing-plan-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.feature-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.feature-input-row input {
+  flex: 1;
+}
+
+.remove-feature-button {
+  padding: 8px 12px;
+  background: #fee;
+  border: 1px solid #fcc;
+  border-radius: 4px;
+  color: #e53e3e;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  transition: all 0.2s;
+}
+
+.remove-feature-button:hover {
+  background: #fcc;
+  border-color: #f99;
+}
+
+.add-feature-button {
+  padding: 8px 12px;
+  background: white;
+  border: 1px dashed #cbd5e0;
+  border-radius: 4px;
+  color: #4a5568;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.add-feature-button:hover {
+  background: #f7fafc;
+  border-color: #667eea;
+  border-style: solid;
+  color: #667eea;
 }
 

@@ -1,4 +1,5 @@
 import { ImageData } from '../../../types/block'
+import ImageUpload from '../ImageUpload'
 import './Block.css'
 
 interface ImageBlockProps {
@@ -21,13 +22,10 @@ export default function ImageBlock({ data, onChange }: ImageBlockProps) {
       </div>
       <div className="block-content">
         <div className="form-group">
-          <label htmlFor="image-url">Image URL *</label>
-          <input
-            type="url"
-            id="image-url"
-            value={data.url || ''}
-            onChange={(e) => handleChange('url', e.target.value)}
-            placeholder="https://example.com/image.jpg"
+          <ImageUpload
+            value={data.url}
+            onChange={(url) => handleChange('url', url)}
+            label="Image"
             required
           />
         </div>
@@ -51,11 +49,6 @@ export default function ImageBlock({ data, onChange }: ImageBlockProps) {
             placeholder="Image caption"
           />
         </div>
-        {data.url && (
-          <div className="image-preview">
-            <img src={data.url} alt={data.alt || 'Preview'} />
-          </div>
-        )}
       </div>
     </div>
   )

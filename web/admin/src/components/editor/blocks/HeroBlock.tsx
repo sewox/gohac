@@ -1,4 +1,5 @@
 import { HeroData } from '../../../types/block'
+import ImageUpload from '../ImageUpload'
 import './Block.css'
 
 interface HeroBlockProps {
@@ -42,13 +43,10 @@ export default function HeroBlock({ data, onChange }: HeroBlockProps) {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="hero-image">Image URL</label>
-          <input
-            type="url"
-            id="hero-image"
-            value={data.image_url || ''}
-            onChange={(e) => handleChange('image_url', e.target.value)}
-            placeholder="https://example.com/image.jpg"
+          <ImageUpload
+            value={data.image_url}
+            onChange={(url) => handleChange('image_url', url)}
+            label="Hero Image"
           />
         </div>
       </div>

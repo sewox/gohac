@@ -14,13 +14,18 @@ type Block struct {
 type BlockType string
 
 const (
-	BlockTypeHero    BlockType = "hero"
-	BlockTypeText    BlockType = "text"
-	BlockTypeImage   BlockType = "image"
-	BlockTypeGallery BlockType = "gallery"
-	BlockTypeVideo   BlockType = "video"
-	BlockTypeQuote   BlockType = "quote"
-	BlockTypeCode    BlockType = "code"
+	BlockTypeHero        BlockType = "hero"
+	BlockTypeText        BlockType = "text"
+	BlockTypeImage       BlockType = "image"
+	BlockTypeGallery     BlockType = "gallery"
+	BlockTypeVideo       BlockType = "video"
+	BlockTypeQuote       BlockType = "quote"
+	BlockTypeCode        BlockType = "code"
+	BlockTypeFeatures    BlockType = "features"
+	BlockTypePricing     BlockType = "pricing"
+	BlockTypeFAQ         BlockType = "faq"
+	BlockTypeTestimonial BlockType = "testimonial"
+	BlockTypeCTA         BlockType = "cta"
 )
 
 // BlockData represents the structure for common block data types
@@ -58,4 +63,83 @@ type CTA struct {
 	Text string `json:"text"`
 	URL  string `json:"url"`
 	Type string `json:"type,omitempty"` // primary, secondary, etc.
+}
+
+// FeaturesBlockData represents data for a features block
+type FeaturesBlockData struct {
+	Title    string        `json:"title,omitempty"`
+	Subtitle string        `json:"subtitle,omitempty"`
+	Items    []FeatureItem `json:"items"`
+	Columns  int           `json:"columns,omitempty"` // 2, 3, or 4
+}
+
+// FeatureItem represents a single feature item
+type FeatureItem struct {
+	Title       string `json:"title"`
+	Description string `json:"description,omitempty"`
+	Icon        string `json:"icon,omitempty"` // Icon name or URL
+}
+
+// PricingBlockData represents data for a pricing block
+type PricingBlockData struct {
+	Title    string        `json:"title,omitempty"`
+	Subtitle string        `json:"subtitle,omitempty"`
+	Plans    []PricingPlan `json:"plans"`
+}
+
+// PricingPlan represents a single pricing plan
+type PricingPlan struct {
+	Name        string   `json:"name"`
+	Price       string   `json:"price"` // e.g., "$99/month" or "$999/year"
+	Description string   `json:"description,omitempty"`
+	Features    []string `json:"features"` // List of feature strings
+	ButtonText  string   `json:"button_text,omitempty"`
+	ButtonURL   string   `json:"button_url,omitempty"`
+	Highlighted bool     `json:"highlighted,omitempty"` // For featured plan
+}
+
+// FAQBlockData represents data for an FAQ block
+type FAQBlockData struct {
+	Title string    `json:"title,omitempty"`
+	Items []FAQItem `json:"items"`
+}
+
+// FAQItem represents a single FAQ item
+type FAQItem struct {
+	Question string `json:"question"`
+	Answer   string `json:"answer"`
+}
+
+// TestimonialBlockData represents data for a testimonials block
+type TestimonialBlockData struct {
+	Title        string            `json:"title,omitempty"`
+	Subtitle     string            `json:"subtitle,omitempty"`
+	Testimonials []TestimonialItem `json:"testimonials"`
+}
+
+// TestimonialItem represents a single testimonial
+type TestimonialItem struct {
+	Quote     string `json:"quote"`
+	Author    string `json:"author"`
+	AvatarURL string `json:"avatar_url,omitempty"`
+	Role      string `json:"role,omitempty"` // e.g., "CEO, Company Name"
+}
+
+// VideoBlockData represents data for a video block
+type VideoBlockData struct {
+	URL         string `json:"url"` // YouTube, Vimeo, or direct video URL
+	Title       string `json:"title,omitempty"`
+	Description string `json:"description,omitempty"`
+	Autoplay    bool   `json:"autoplay,omitempty"`
+	Loop        bool   `json:"loop,omitempty"`
+}
+
+// CTABlockData represents data for a CTA block
+type CTABlockData struct {
+	Title       string `json:"title"`
+	Subtitle    string `json:"subtitle,omitempty"`
+	ButtonText  string `json:"button_text"`
+	ButtonURL   string `json:"button_url"`
+	ButtonStyle string `json:"button_style,omitempty"` // primary, secondary, outline
+	Background  string `json:"background,omitempty"`   // Color or gradient
 }

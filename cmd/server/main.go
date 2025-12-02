@@ -42,7 +42,24 @@ func main() {
 		Format: "[${time}] ${status} - ${latency} ${method} ${path}\n",
 	}))
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "*",
+		AllowOriginsFunc: func(origin string) bool {
+			// In development, allow all origins
+			// In production, validate against allowed origins list
+			if os.Getenv("ENV") == "production" {
+				allowedOrigins := []string{
+					"localhost:3131",
+					// Add your production domains here
+				}
+				for _, allowed := range allowedOrigins {
+					if origin == allowed {
+						return true
+					}
+				}
+				return false
+			}
+			// Development: allow all origins
+			return true
+		},
 		AllowMethods:     "GET,POST,PUT,DELETE,PATCH,OPTIONS",
 		AllowHeaders:     "Origin,Content-Type,Accept,Authorization,X-Tenant-ID",
 		AllowCredentials: true,
@@ -79,7 +96,7 @@ func main() {
 	// Start server
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "3000"
+		port = "3131"
 	}
 
 	log.Printf("🚀 Gohac CMS Server starting on port %s", port)

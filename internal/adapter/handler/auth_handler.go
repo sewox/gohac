@@ -61,15 +61,15 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 
-	// Create HTTP-only, Secure, SameSite=Strict cookie
+	// Create HTTP-only cookie (Secure: false for localhost dev, SameSite: Lax)
 	cookie := &fiber.Cookie{
 		Name:     middleware.AuthTokenCookieName,
 		Value:    token,
 		Path:     "/",
 		MaxAge:   24 * 60 * 60, // 24 hours in seconds
 		HTTPOnly: true,
-		Secure:   true,
-		SameSite: "Strict",
+		Secure:   false, // Set to false for localhost development
+		SameSite: "Lax", // Changed to Lax for better compatibility
 	}
 
 	// Set cookie
@@ -84,4 +84,26 @@ func Login(c *fiber.Ctx) error {
 	response.User.Email = req.Email
 
 	return c.Status(fiber.StatusOK).JSON(response)
+}
+
+// Me returns the current authenticated user's information
+// This endpoint is protected and requires valid JWT token
+func Me(c *fiber.Ctx) error {
+	userID := c.Locals("user_id")
+	userEmail := c.Locals("user_email")
+
+	if userID == nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "User not authenticated",
+			"code":  fiber.StatusUnauthorized,
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"user": fiber.Map{
+			"id":    userID,
+			"email": userEmail,
+		},
+	})
 }

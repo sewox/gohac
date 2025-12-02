@@ -125,6 +125,11 @@ func setupAPIRoutes(app *fiber.App, db *gorm.DB) {
 	auth := api.Group("/auth")
 	auth.Post("/login", handler.Login)
 
+	// Protected auth routes
+	authProtected := api.Group("/auth")
+	authProtected.Use(middleware.Protected())
+	authProtected.Get("/me", handler.Me)
+
 	// Protected routes (require authentication)
 	v1 := api.Group("/v1")
 	v1.Use(middleware.Protected()) // Apply auth middleware to all v1 routes

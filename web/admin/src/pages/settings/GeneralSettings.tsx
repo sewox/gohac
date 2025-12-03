@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Save } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { settingsAPI } from '../../lib/api'
+import { settingsAPI, menusAPI } from '../../lib/api'
 import ImageUpload from '../../components/editor/ImageUpload'
 import './Settings.css'
 
@@ -10,6 +10,14 @@ interface GlobalSettings {
   logo: string
   favicon: string
   contact_email: string
+  header_menu_id?: string
+  footer_menu_id?: string
+}
+
+interface Menu {
+  id: string
+  name: string
+  description?: string
 }
 
 export default function GeneralSettings() {
@@ -18,20 +26,28 @@ export default function GeneralSettings() {
     logo: '',
     favicon: '',
     contact_email: '',
+    header_menu_id: '',
+    footer_menu_id: '',
   })
+  const [menus, setMenus] = useState<Menu[]>([])
   const [loading, setLoading] = useState(false)
   const [fetching, setFetching] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchSettings()
+    fetchMenus()
   }, [])
 
   const fetchSettings = async () => {
     try {
       setFetching(true)
       const response = await settingsAPI.get()
-      setSettings(response.data)
+      setSettings({
+        ...response.data,
+        header_menu_id: response.data.header_menu_id || '',
+        footer_menu_id: response.data.footer_menu_id || '',
+      })
       setError(null)
     } catch (err: any) {
       const errorMsg = err.response?.data?.error || 'Failed to load settings'
@@ -39,6 +55,16 @@ export default function GeneralSettings() {
       toast.error(errorMsg)
     } finally {
       setFetching(false)
+    }
+  }
+
+  const fetchMenus = async () => {
+    try {
+      const response = await menusAPI.list()
+      setMenus(response.data.data || [])
+    } catch (err: any) {
+      console.error('Failed to load menus:', err)
+      // Don't show error toast for menus, just log it
     }
   }
 
@@ -130,6 +156,42 @@ export default function GeneralSettings() {
             label="Favicon"
           />
           <small>Favicon displayed in browser tabs (recommended: 32x32px or 16x16px)</small>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="header_menu_id">Header Menu</label>
+          <select
+            id="header_menu_id"
+            value={settings.header_menu_id || ''}
+            onChange={(e) => setSettings({ ...settings, header_menu_id: e.target.value || undefined })}
+            disabled={loading}
+          >
+            <option value="">None (No menu in header)</option>
+            {menus.map((menu) => (
+              <option key={menu.id} value={menu.id}>
+                {menu.name}
+              </option>
+            ))}
+          </select>
+          <small>Select a menu to display in the site header</small>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="footer_menu_id">Footer Menu</label>
+          <select
+            id="footer_menu_id"
+            value={settings.footer_menu_id || ''}
+            onChange={(e) => setSettings({ ...settings, footer_menu_id: e.target.value || undefined })}
+            disabled={loading}
+          >
+            <option value="">None (No menu in footer)</option>
+            {menus.map((menu) => (
+              <option key={menu.id} value={menu.id}>
+                {menu.name}
+              </option>
+            ))}
+          </select>
+          <small>Select a menu to display in the site footer</small>
         </div>
 
         <div className="form-actions">

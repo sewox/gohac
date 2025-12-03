@@ -10,12 +10,13 @@ require (
 	gorm.io/datatypes v1.2.0
 	gorm.io/driver/postgres v1.5.7
 	gorm.io/driver/sqlite v1.5.6
-	gorm.io/gorm v1.25.10
+	gorm.io/gorm v1.26.1
 )
 
 require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/go-gormigrate/gormigrate/v2 v2.1.5 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
@@ -36,7 +37,7 @@ require (
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	golang.org/x/crypto v0.14.0 // indirect
 	golang.org/x/sys v0.26.0 // indirect
-	golang.org/x/text v0.13.0 // indirect
+	golang.org/x/text v0.22.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gorm.io/driver/mysql v1.4.7 // indirect
 )

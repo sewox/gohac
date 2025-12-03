@@ -14,6 +14,8 @@ type GlobalSettings struct {
 	Logo         string `json:"logo"`
 	Favicon      string `json:"favicon"`
 	ContactEmail string `json:"contact_email"`
+	HeaderMenuID string `json:"header_menu_id,omitempty"` // UUID of the menu to display in header
+	FooterMenuID string `json:"footer_menu_id,omitempty"` // UUID of the menu to display in footer
 }
 
 // MenuItem represents a single menu item (can be nested)

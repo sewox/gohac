@@ -47,6 +47,8 @@ type UpdateSettingsRequest struct {
 	Logo         string `json:"logo"`
 	Favicon      string `json:"favicon"`
 	ContactEmail string `json:"contact_email"`
+	HeaderMenuID string `json:"header_menu_id,omitempty"` // UUID of the menu to display in header
+	FooterMenuID string `json:"footer_menu_id,omitempty"` // UUID of the menu to display in footer
 }
 
 // UpdateSettings handles PUT /api/v1/settings (protected endpoint)
@@ -72,6 +74,8 @@ func (h *SettingsHandler) UpdateSettings(c *fiber.Ctx) error {
 		Logo:         req.Logo,
 		Favicon:      req.Favicon,
 		ContactEmail: req.ContactEmail,
+		HeaderMenuID: req.HeaderMenuID,
+		FooterMenuID: req.FooterMenuID,
 	}
 
 	if err := repo.UpdateGlobalSettings(c.Context(), settings); err != nil {

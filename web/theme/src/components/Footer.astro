@@ -1,0 +1,180 @@
+---
+import { getGlobalSettings, getMenuById } from '../lib/api';
+
+// Fetch global settings
+const settings = await getGlobalSettings();
+
+// Fetch footer menu if footer_menu_id is set
+let footerMenu = null;
+if (settings.footer_menu_id) {
+  try {
+    footerMenu = await getMenuById(settings.footer_menu_id);
+  } catch (error) {
+    console.error('Error fetching footer menu:', error);
+  }
+}
+
+// Helper function to render menu items recursively
+function renderMenuItems(items: any[]): string {
+  if (!items || items.length === 0) return '';
+  
+  return items.map(item => {
+    const childrenHtml = item.children && item.children.length > 0 
+      ? `<ul class="footer-menu-sub">${renderMenuItems(item.children)}</ul>` 
+      : '';
+    
+    return `
+      <li class="footer-menu-item">
+        <a href="${item.url}" ${item.target ? `target="${item.target}"` : ''} class="footer-menu-link">
+          ${item.label}
+        </a>
+        ${childrenHtml}
+      </li>
+    `;
+  }).join('');
+}
+---
+
+<footer class="footer">
+  <div class="footer-container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3 class="footer-title">{settings.site_name || 'Gohac CMS'}</h3>
+        {settings.contact_email && (
+          <p class="footer-contact">
+            <a href={`mailto:${settings.contact_email}`} class="footer-link">
+              {settings.contact_email}
+            </a>
+          </p>
+        )}
+      </div>
+
+      {footerMenu && footerMenu.items && footerMenu.items.length > 0 && (
+        <nav class="footer-nav">
+          <ul class="footer-menu" set:html={renderMenuItems(footerMenu.items)} />
+        </nav>
+      )}
+    </div>
+
+    <div class="footer-bottom">
+      <p class="footer-copyright">
+        &copy; {new Date().getFullYear()} {settings.site_name || 'Gohac CMS'}. All rights reserved.
+      </p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background-color: #1a202c;
+    border-top: 1px solid #2d3748;
+    padding: 3rem 0 1.5rem;
+    margin-top: 4rem;
+  }
+
+  .footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .footer-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .footer-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #f7fafc;
+    margin: 0;
+  }
+
+  .footer-contact {
+    color: #a0aec0;
+    font-size: 0.875rem;
+    margin: 0;
+  }
+
+  .footer-link {
+    color: #4299e1;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .footer-link:hover {
+    color: #63b3ed;
+  }
+
+  .footer-nav {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .footer-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .footer-menu-item {
+    margin: 0;
+  }
+
+  .footer-menu-link {
+    color: #cbd5e0;
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: color 0.2s;
+    display: block;
+  }
+
+  .footer-menu-link:hover {
+    color: #f7fafc;
+  }
+
+  .footer-menu-sub {
+    list-style: none;
+    padding: 0.5rem 0 0 1rem;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .footer-menu-sub .footer-menu-link {
+    font-size: 0.8125rem;
+    color: #a0aec0;
+  }
+
+  .footer-bottom {
+    border-top: 1px solid #2d3748;
+    padding-top: 1.5rem;
+    text-align: center;
+  }
+
+  .footer-copyright {
+    color: #718096;
+    font-size: 0.875rem;
+    margin: 0;
+  }
+
+  @media (min-width: 768px) {
+    .footer-menu {
+      flex-direction: row;
+      gap: 1.5rem;
+    }
+  }
+</style>
+

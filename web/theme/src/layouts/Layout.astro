@@ -1,5 +1,6 @@
 ---
 import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
 import { getGlobalSettings } from '../lib/api';
 
 interface Props {
@@ -75,6 +76,7 @@ const faviconUrl = settings.favicon
   <body class="bg-gray-900 text-gray-100 antialiased">
     <Header settings={settings} />
     <slot />
+    <Footer />
   </body>
 </html>
 

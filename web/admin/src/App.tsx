@@ -10,6 +10,10 @@ import PageEdit from './pages/pages/PageEdit'
 import GeneralSettings from './pages/settings/GeneralSettings'
 import MenuList from './pages/menus/MenuList'
 import MenuForm from './pages/menus/MenuForm'
+import UserList from './pages/users/UserList'
+import UserForm from './pages/users/UserForm'
+import MediaLibrary from './pages/media/MediaLibrary'
+import Profile from './pages/profile/Profile'
 import './App.css'
 
 function App() {
@@ -99,11 +103,66 @@ function App() {
           />
 
           <Route
+            path="/admin/users"
+            element={
+              <RequireAuth>
+                <Layout>
+                  <UserList />
+                </Layout>
+              </RequireAuth>
+            }
+          />
+
+          <Route
+            path="/admin/users/new"
+            element={
+              <RequireAuth>
+                <Layout>
+                  <UserForm />
+                </Layout>
+              </RequireAuth>
+            }
+          />
+
+          <Route
+            path="/admin/users/:id/edit"
+            element={
+              <RequireAuth>
+                <Layout>
+                  <UserForm />
+                </Layout>
+              </RequireAuth>
+            }
+          />
+
+          <Route
+            path="/admin/media"
+            element={
+              <RequireAuth>
+                <Layout>
+                  <MediaLibrary />
+                </Layout>
+              </RequireAuth>
+            }
+          />
+
+          <Route
             path="/admin/settings"
             element={
               <RequireAuth>
                 <Layout>
                   <GeneralSettings />
+                </Layout>
+              </RequireAuth>
+            }
+          />
+
+          <Route
+            path="/admin/profile"
+            element={
+              <RequireAuth>
+                <Layout>
+                  <Profile />
                 </Layout>
               </RequireAuth>
             }

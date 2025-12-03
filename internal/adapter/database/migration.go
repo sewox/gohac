@@ -101,6 +101,52 @@ func Migrate(db *gorm.DB) error {
 				return nil // Complex rollback for table recreation is often manual or not fully automated
 			},
 		},
+		{
+			ID: "20240104_users",
+			Migrate: func(tx *gorm.DB) error {
+				log.Println("Running migration 20240104_users: Creating Users table")
+
+				// Create users table
+				if err := tx.AutoMigrate(&domain.User{}); err != nil {
+					return fmt.Errorf("failed to create users table: %w", err)
+				}
+
+				// Check if table is empty, then seed default admin
+				var count int64
+				if err := tx.Model(&domain.User{}).Count(&count).Error; err != nil {
+					return fmt.Errorf("failed to count users: %w", err)
+				}
+
+				if count == 0 {
+					log.Println("Users table is empty. Seeding default admin user...")
+					adminUser := &domain.User{
+						Name:     "Admin",
+						Email:    "admin@example.com",
+						Password: "password", // Will be hashed
+						Role:     domain.UserRoleAdmin,
+					}
+
+					// Hash password before saving
+					if err := adminUser.HashPassword(); err != nil {
+						return fmt.Errorf("failed to hash admin password: %w", err)
+					}
+
+					if err := tx.Create(adminUser).Error; err != nil {
+						return fmt.Errorf("failed to seed admin user: %w", err)
+					}
+
+					log.Println("✅ Default admin user created: admin@example.com / password")
+				} else {
+					log.Println("Users table already has data. Skipping seed.")
+				}
+
+				return nil
+			},
+			Rollback: func(tx *gorm.DB) error {
+				log.Println("Rolling back migration 20240104_users")
+				return tx.Migrator().DropTable(&domain.User{})
+			},
+		},
 	})
 
 	if err := m.Migrate(); err != nil {

@@ -57,3 +57,16 @@ export const menusAPI = {
   getPublic: (id: string) => api.get(`/public/menus/${id}`),
 }
 
+export const usersAPI = {
+  list: () => api.get('/v1/users'),
+  get: (id: string) => api.get(`/v1/users/${id}`),
+  create: (data: any) => api.post('/v1/users', data),
+  update: (id: string, data: any) => api.put(`/v1/users/${id}`, data),
+  delete: (id: string) => api.delete(`/v1/users/${id}`),
+}
+
+export const mediaAPI = {
+  list: () => api.get('/v1/media'),
+  get: (filename: string) => api.get(`/v1/media/${filename}`),
+}
+

@@ -1,10 +1,26 @@
 package handler
 
 import (
+	"gohac/internal/adapter/database"
+	"gohac/internal/adapter/repository"
 	"gohac/internal/middleware"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
+
+// AuthHandler handles authentication-related HTTP requests
+type AuthHandler struct {
+	db *gorm.DB
+}
+
+// NewAuthHandler creates a new auth handler instance
+func NewAuthHandler(db *gorm.DB) *AuthHandler {
+	return &AuthHandler{
+		db: db,
+	}
+}
 
 // LoginRequest represents the login request payload
 type LoginRequest struct {
@@ -18,13 +34,14 @@ type LoginResponse struct {
 	Message string `json:"message"`
 	User    struct {
 		ID    string `json:"id"`
+		Name  string `json:"name"`
 		Email string `json:"email"`
+		Role  string `json:"role"`
 	} `json:"user"`
 }
 
-// Login handles user authentication
-// Mock authentication: accepts any email with password "admin123"
-func Login(c *fiber.Ctx) error {
+// Login handles user authentication with real database lookup and bcrypt
+func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	var req LoginRequest
 
 	// Parse request body
@@ -43,9 +60,26 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 
-	// Mock authentication check
-	// TODO: Replace with actual database lookup and password hashing
-	if req.Password != "admin123" {
+	// Get database from context (fallback to handler's DB if needed)
+	db, err := database.GetDBFromContext(c.Context())
+	if err != nil {
+		// Fallback to handler's DB
+		db = h.db
+	}
+
+	// Get user by email
+	userRepo := repository.NewUserRepository(db)
+	user, err := userRepo.GetByEmail(c.Context(), req.Email)
+	if err != nil {
+		// Don't reveal if user exists or not (security best practice)
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "Invalid email or password",
+			"code":  fiber.StatusUnauthorized,
+		})
+	}
+
+	// Verify password
+	if !user.CheckPassword(req.Password) {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": "Invalid email or password",
 			"code":  fiber.StatusUnauthorized,
@@ -53,7 +87,7 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	// Generate JWT token (valid for 24 hours)
-	token, err := middleware.GenerateToken(req.Email, req.Email, 24)
+	token, err := middleware.GenerateToken(user.ID.String(), user.Email, 24)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to generate token",
@@ -80,18 +114,18 @@ func Login(c *fiber.Ctx) error {
 		Success: true,
 		Message: "Login successful",
 	}
-	response.User.ID = req.Email
-	response.User.Email = req.Email
+	response.User.ID = user.ID.String()
+	response.User.Name = user.Name
+	response.User.Email = user.Email
+	response.User.Role = string(user.Role)
 
 	return c.Status(fiber.StatusOK).JSON(response)
 }
 
 // Me returns the current authenticated user's information
 // This endpoint is protected and requires valid JWT token
-func Me(c *fiber.Ctx) error {
+func (h *AuthHandler) Me(c *fiber.Ctx) error {
 	userID := c.Locals("user_id")
-	userEmail := c.Locals("user_email")
-
 	if userID == nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": "User not authenticated",
@@ -99,11 +133,69 @@ func Me(c *fiber.Ctx) error {
 		})
 	}
 
+	// Get database from context (fallback to handler's DB if needed)
+	db, err := database.GetDBFromContext(c.Context())
+	if err != nil {
+		// Fallback to handler's DB
+		db = h.db
+	}
+
+	// Get user from database
+	userRepo := repository.NewUserRepository(db)
+	userIDStr, ok := userID.(string)
+	if !ok {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Invalid user ID format",
+			"code":  fiber.StatusInternalServerError,
+		})
+	}
+
+	userUUID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Invalid user ID format",
+			"code":  fiber.StatusInternalServerError,
+		})
+	}
+
+	user, err := userRepo.GetByID(c.Context(), userUUID)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "User not found",
+			"code":  fiber.StatusNotFound,
+		})
+	}
+
+	// Return user info (excluding password)
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"user": fiber.Map{
-			"id":    userID,
-			"email": userEmail,
+			"id":    user.ID.String(),
+			"name":  user.Name,
+			"email": user.Email,
+			"role":  user.Role,
 		},
+	})
+}
+
+// Logout handles user logout by clearing the authentication cookie
+func (h *AuthHandler) Logout(c *fiber.Ctx) error {
+	// Clear the authentication cookie by setting it to expire immediately
+	cookie := &fiber.Cookie{
+		Name:     middleware.AuthTokenCookieName,
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1, // Expire immediately
+		HTTPOnly: true,
+		Secure:   false, // Set to false for localhost development
+		SameSite: "Lax",
+	}
+
+	// Set cookie to clear it
+	c.Cookie(cookie)
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "Logged out successfully",
 	})
 }

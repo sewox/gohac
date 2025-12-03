@@ -3,7 +3,9 @@ import { authAPI } from '../lib/api'
 
 interface User {
   id: string
+  name?: string
   email: string
+  role?: string
 }
 
 interface AuthContextType {
@@ -11,6 +13,7 @@ interface AuthContextType {
   loading: boolean
   login: (email: string, password: string) => Promise<void>
   logout: () => void
+  refreshUser: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -65,14 +68,35 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }
 
-  const logout = () => {
-    setUser(null)
-    // In a real app, you'd call authAPI.logout() here
-    window.location.href = '/login'
+  const logout = async () => {
+    try {
+      // Call logout endpoint to clear cookie on server
+      await authAPI.logout()
+    } catch (error) {
+      // Even if logout fails, clear local state
+      console.error('Logout error:', error)
+    } finally {
+      // Clear user state
+      setUser(null)
+      // Redirect to login page
+      window.location.href = '/admin/login'
+    }
+  }
+
+  const refreshUser = async () => {
+    try {
+      const response = await authAPI.me()
+      if (response.data.user) {
+        setUser(response.data.user)
+      }
+    } catch (error) {
+      // User is not authenticated
+      setUser(null)
+    }
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   )

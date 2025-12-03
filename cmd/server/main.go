@@ -123,14 +123,18 @@ func main() {
 func setupAPIRoutes(app *fiber.App, db *gorm.DB) {
 	api := app.Group("/api")
 
+	// Create auth handler
+	authHandler := handler.NewAuthHandler(db)
+
 	// Public auth routes
 	auth := api.Group("/auth")
-	auth.Post("/login", handler.Login)
+	auth.Post("/login", authHandler.Login)
 
 	// Protected auth routes
 	authProtected := api.Group("/auth")
 	authProtected.Use(middleware.Protected())
-	authProtected.Get("/me", handler.Me)
+	authProtected.Get("/me", authHandler.Me)
+	authProtected.Post("/logout", authHandler.Logout)
 
 	// Protected routes (require authentication)
 	v1 := api.Group("/v1")
@@ -167,6 +171,19 @@ func setupAPIRoutes(app *fiber.App, db *gorm.DB) {
 	v1.Get("/menus/:id", menuHandler.GetMenu)
 	v1.Put("/menus/:id", menuHandler.UpdateMenu)
 	v1.Delete("/menus/:id", menuHandler.DeleteMenu)
+
+	// User handler
+	userHandler := handler.NewUserHandler(db)
+	v1.Get("/users", userHandler.ListUsers)
+	v1.Get("/users/:id", userHandler.GetUser)
+	v1.Post("/users", userHandler.CreateUser)
+	v1.Put("/users/:id", userHandler.UpdateUser)
+	v1.Delete("/users/:id", userHandler.DeleteUser)
+
+	// Media handler
+	mediaHandler := handler.NewMediaHandler()
+	v1.Get("/media", mediaHandler.ListMedia)
+	v1.Get("/media/:filename", mediaHandler.GetMediaInfo)
 
 	// Public API routes (no authentication required)
 	public := app.Group("/api/public")

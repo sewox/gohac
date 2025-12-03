@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { LogOut, LayoutDashboard, FileText, Settings, Menu } from 'lucide-react'
+import { LogOut, LayoutDashboard, FileText, Settings, Menu, Users, Image as ImageIcon, User } from 'lucide-react'
 import './Layout.css'
 
 interface LayoutProps {
@@ -42,11 +42,32 @@ export default function Layout({ children }: LayoutProps) {
             <span>Menus</span>
           </Link>
           <Link
+            to="/admin/users"
+            className={`nav-item ${location.pathname.startsWith('/admin/users') ? 'active' : ''}`}
+          >
+            <Users size={20} />
+            <span>Users</span>
+          </Link>
+          <Link
+            to="/admin/media"
+            className={`nav-item ${location.pathname.startsWith('/admin/media') ? 'active' : ''}`}
+          >
+            <ImageIcon size={20} />
+            <span>Media</span>
+          </Link>
+          <Link
             to="/admin/settings"
             className={`nav-item ${location.pathname.startsWith('/admin/settings') ? 'active' : ''}`}
           >
             <Settings size={20} />
             <span>Settings</span>
+          </Link>
+          <Link
+            to="/admin/profile"
+            className={`nav-item ${location.pathname.startsWith('/admin/profile') ? 'active' : ''}`}
+          >
+            <User size={20} />
+            <span>Profile</span>
           </Link>
         </nav>
 

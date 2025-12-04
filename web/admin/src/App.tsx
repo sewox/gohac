@@ -14,6 +14,10 @@ import UserList from './pages/users/UserList'
 import UserForm from './pages/users/UserForm'
 import MediaLibrary from './pages/media/MediaLibrary'
 import Profile from './pages/profile/Profile'
+import PostList from './pages/posts/PostList'
+import PostForm from './pages/posts/PostForm'
+import CategoryList from './pages/categories/CategoryList'
+import CategoryForm from './pages/categories/CategoryForm'
 import './App.css'
 
 function App() {
@@ -163,6 +167,72 @@ function App() {
               <RequireAuth>
                 <Layout>
                   <Profile />
+                </Layout>
+              </RequireAuth>
+            }
+          />
+
+          <Route
+            path="/admin/posts"
+            element={
+              <RequireAuth>
+                <Layout>
+                  <PostList />
+                </Layout>
+              </RequireAuth>
+            }
+          />
+
+          <Route
+            path="/admin/posts/new"
+            element={
+              <RequireAuth>
+                <Layout>
+                  <PostForm />
+                </Layout>
+              </RequireAuth>
+            }
+          />
+
+          <Route
+            path="/admin/posts/:id/edit"
+            element={
+              <RequireAuth>
+                <Layout>
+                  <PostForm />
+                </Layout>
+              </RequireAuth>
+            }
+          />
+
+          <Route
+            path="/admin/categories"
+            element={
+              <RequireAuth>
+                <Layout>
+                  <CategoryList />
+                </Layout>
+              </RequireAuth>
+            }
+          />
+
+          <Route
+            path="/admin/categories/new"
+            element={
+              <RequireAuth>
+                <Layout>
+                  <CategoryForm />
+                </Layout>
+              </RequireAuth>
+            }
+          />
+
+          <Route
+            path="/admin/categories/:id/edit"
+            element={
+              <RequireAuth>
+                <Layout>
+                  <CategoryForm />
                 </Layout>
               </RequireAuth>
             }

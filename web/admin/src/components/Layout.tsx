@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { LogOut, LayoutDashboard, FileText, Settings, Menu, Users, Image as ImageIcon, User } from 'lucide-react'
+import { LogOut, LayoutDashboard, FileText, Settings, Menu, Users, Image as ImageIcon, User, BookOpen, Tag } from 'lucide-react'
 import './Layout.css'
 
 interface LayoutProps {
@@ -33,6 +33,20 @@ export default function Layout({ children }: LayoutProps) {
           >
             <FileText size={20} />
             <span>Pages</span>
+          </Link>
+          <Link
+            to="/admin/posts"
+            className={`nav-item ${location.pathname.startsWith('/admin/posts') ? 'active' : ''}`}
+          >
+            <BookOpen size={20} />
+            <span>Posts</span>
+          </Link>
+          <Link
+            to="/admin/categories"
+            className={`nav-item ${location.pathname.startsWith('/admin/categories') ? 'active' : ''}`}
+          >
+            <Tag size={20} />
+            <span>Categories</span>
           </Link>
           <Link
             to="/admin/menus"

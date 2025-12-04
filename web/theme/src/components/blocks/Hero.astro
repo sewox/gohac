@@ -6,6 +6,12 @@ interface Props {
 }
 
 const { title, subtitle, image_url } = Astro.props;
+
+// Build full image URL
+const API_BASE_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3131';
+const fullImageUrl = image_url 
+  ? (image_url.startsWith('http') ? image_url : `${API_BASE_URL}${image_url.startsWith('/') ? image_url : '/' + image_url}`)
+  : '';
 ---
 
 <section class="relative bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white py-20 md:py-32">
@@ -15,10 +21,10 @@ const { title, subtitle, image_url } = Astro.props;
       {subtitle && (
         <p class="text-xl md:text-2xl text-blue-100 mb-8">{subtitle}</p>
       )}
-      {image_url && (
+      {fullImageUrl && (
         <div class="mt-12">
           <img 
-            src={image_url} 
+            src={fullImageUrl} 
             alt={title}
             class="max-w-full h-auto rounded-lg shadow-2xl mx-auto"
           />

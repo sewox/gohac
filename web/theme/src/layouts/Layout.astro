@@ -64,11 +64,20 @@ const faviconUrl = settings.favicon
     <meta name="twitter:description" content={metaDescription} />
     {fullImageUrl && <meta name="twitter:image" content={fullImageUrl} />}
     
-    <script>
-      // Apply dark theme immediately to prevent flash
-      if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    <script is:inline>
+      // Apply theme based on user preference
+      // Respects localStorage preference, falls back to system preference, defaults to dark
+      const storedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      
+      if (storedTheme === 'dark' || (!storedTheme && prefersDark) || (!storedTheme && !prefersDark)) {
+        // Apply dark theme if:
+        // 1. User explicitly chose dark theme, OR
+        // 2. No preference stored and system prefers dark, OR
+        // 3. No preference stored (default to dark theme)
         document.documentElement.classList.add('dark');
-      } else {
+      } else if (storedTheme === 'light') {
+        // Apply light theme only if user explicitly chose it
         document.documentElement.classList.remove('dark');
       }
     </script>

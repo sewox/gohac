@@ -11,6 +11,13 @@ interface Props {
 }
 
 const { title, subtitle, testimonials = [] } = Astro.props;
+
+// Build full image URL helper
+const API_BASE_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3131';
+function getFullImageUrl(url: string | undefined): string {
+  if (!url) return '';
+  return url.startsWith('http') ? url : `${API_BASE_URL}${url.startsWith('/') ? url : '/' + url}`;
+}
 ---
 
 <section class="py-16 md:py-24 bg-gray-900">
@@ -30,7 +37,7 @@ const { title, subtitle, testimonials = [] } = Astro.props;
             <div class="flex items-center">
               {testimonial.avatar_url && (
                 <img 
-                  src={testimonial.avatar_url} 
+                  src={getFullImageUrl(testimonial.avatar_url)} 
                   alt={testimonial.author}
                   class="w-12 h-12 rounded-full mr-4 border-2 border-gray-600"
                 />

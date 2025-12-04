@@ -147,6 +147,45 @@ func Migrate(db *gorm.DB) error {
 				return tx.Migrator().DropTable(&domain.User{})
 			},
 		},
+		{
+			ID: "20240105_blog",
+			Migrate: func(tx *gorm.DB) error {
+				log.Println("Running migration 20240105_blog: Creating Posts and Categories tables")
+
+				// Create posts table
+				if err := tx.AutoMigrate(&domain.Post{}); err != nil {
+					return fmt.Errorf("failed to create posts table: %w", err)
+				}
+
+				// Create categories table
+				if err := tx.AutoMigrate(&domain.Category{}); err != nil {
+					return fmt.Errorf("failed to create categories table: %w", err)
+				}
+
+				// Create post_categories join table (many-to-many)
+				// GORM will create this automatically, but we ensure it exists
+				if !tx.Migrator().HasTable("post_categories") {
+					if err := tx.Exec(`
+						CREATE TABLE IF NOT EXISTS post_categories (
+							post_id TEXT NOT NULL,
+							category_id TEXT NOT NULL,
+							PRIMARY KEY (post_id, category_id),
+							FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+							FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
+						)
+					`).Error; err != nil {
+						return fmt.Errorf("failed to create post_categories table: %w", err)
+					}
+				}
+
+				log.Println("✅ Blog tables created successfully")
+				return nil
+			},
+			Rollback: func(tx *gorm.DB) error {
+				log.Println("Rolling back migration 20240105_blog")
+				return tx.Migrator().DropTable("post_categories", &domain.Post{}, &domain.Category{})
+			},
+		},
 	})
 
 	if err := m.Migrate(); err != nil {

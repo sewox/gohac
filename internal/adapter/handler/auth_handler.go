@@ -199,3 +199,97 @@ func (h *AuthHandler) Logout(c *fiber.Ctx) error {
 		"message": "Logged out successfully",
 	})
 }
+
+// UpdateProfileRequest represents the request body for updating user profile
+type UpdateProfileRequest struct {
+	Name     string `json:"name,omitempty"`
+	Password string `json:"password,omitempty"` // Optional - only update if provided
+}
+
+// UpdateProfile handles PUT /api/auth/profile (protected endpoint)
+// Allows users to update their own profile (name and password only)
+func (h *AuthHandler) UpdateProfile(c *fiber.Ctx) error {
+	userID := c.Locals("user_id")
+	if userID == nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "User not authenticated",
+			"code":  fiber.StatusUnauthorized,
+		})
+	}
+
+	var req UpdateProfileRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request body",
+			"code":  fiber.StatusBadRequest,
+		})
+	}
+
+	// Get database from context (fallback to handler's DB if needed)
+	db, err := database.GetDBFromContext(c.Context())
+	if err != nil {
+		db = h.db
+	}
+
+	// Get current user
+	userRepo := repository.NewUserRepository(db)
+	userIDStr, ok := userID.(string)
+	if !ok {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Invalid user ID format",
+			"code":  fiber.StatusInternalServerError,
+		})
+	}
+
+	userUUID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Invalid user ID format",
+			"code":  fiber.StatusInternalServerError,
+		})
+	}
+
+	user, err := userRepo.GetByID(c.Context(), userUUID)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "User not found",
+			"code":  fiber.StatusNotFound,
+		})
+	}
+
+	// Update fields (only name and password allowed for profile update)
+	if req.Name != "" {
+		user.Name = req.Name
+	}
+
+	if req.Password != "" {
+		// Hash new password
+		user.Password = req.Password
+		if err := user.HashPassword(); err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": "Failed to process password",
+				"code":  fiber.StatusInternalServerError,
+			})
+		}
+	}
+
+	// Save updated user
+	if err := userRepo.Update(c.Context(), user); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to update profile",
+			"code":  fiber.StatusInternalServerError,
+		})
+	}
+
+	// Return updated user info (excluding password)
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "Profile updated successfully",
+		"user": fiber.Map{
+			"id":    user.ID.String(),
+			"name":  user.Name,
+			"email": user.Email,
+			"role":  user.Role,
+		},
+	})
+}

@@ -1,0 +1,227 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import BlockRenderer from '../../components/BlockRenderer.astro';
+
+interface Post {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  featured_image?: string;
+  published_at: string | null;
+  created_at: string;
+  author?: {
+    name: string;
+    email: string;
+  };
+  categories?: Array<{
+    id: string;
+    name: string;
+    slug: string;
+  }>;
+}
+
+// Mark this route as dynamic (not prerendered)
+export const prerender = false;
+
+const slug = Astro.params.slug;
+const API_BASE_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3131';
+
+let post: Post | null = null;
+let error: string | null = null;
+
+try {
+  const response = await fetch(`${API_BASE_URL}/api/public/posts/${slug}`);
+  
+  if (response.status === 404) {
+    return Astro.redirect('/404');
+  }
+  
+  if (!response.ok) {
+    error = `Failed to load post: ${response.statusText}`;
+  } else {
+    post = await response.json();
+  }
+} catch (err) {
+  console.error('Error fetching post:', err);
+  error = err instanceof Error ? err.message : 'Failed to load post';
+}
+
+if (error || !post) {
+  return Astro.redirect('/404');
+}
+
+// Parse content blocks from JSON
+let blocks: any[] = [];
+if (post.content) {
+  if (typeof post.content === 'string') {
+    try {
+      blocks = JSON.parse(post.content);
+    } catch (e) {
+      blocks = [];
+    }
+  } else if (Array.isArray(post.content)) {
+    blocks = post.content;
+  }
+}
+
+// Extract SEO data
+const metaTitle = post.title;
+const metaDescription = post.excerpt;
+const ogImage = post.featured_image;
+---
+
+<Layout 
+  title={metaTitle}
+  description={metaDescription}
+  image={ogImage}
+>
+  <main class="post-page">
+    <article class="post-article">
+      <header class="post-header">
+        {post.featured_image && (
+          <div class="post-featured-image">
+            <img 
+              src={post.featured_image.startsWith('http') ? post.featured_image : `${API_BASE_URL}${post.featured_image.startsWith('/') ? post.featured_image : '/' + post.featured_image}`} 
+              alt={post.title} 
+            />
+          </div>
+        )}
+        <div class="post-header-content">
+          <h1 class="post-title">{post.title}</h1>
+          {post.excerpt && (
+            <p class="post-excerpt">{post.excerpt}</p>
+          )}
+          <div class="post-meta">
+            {post.published_at && (
+              <time datetime={post.published_at}>
+                {new Date(post.published_at).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </time>
+            )}
+            {post.author && (
+              <span class="post-author">By {post.author.name || post.author.email}</span>
+            )}
+            {post.categories && post.categories.length > 0 && (
+              <div class="post-categories">
+                {post.categories.map((cat) => (
+                  <a href={`/blog/category/${cat.slug}`} class="category-tag">{cat.name}</a>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <div class="post-content">
+        {blocks.map((block) => (
+          <BlockRenderer block={block} />
+        ))}
+      </div>
+    </article>
+  </main>
+</Layout>
+
+<style>
+  .post-page {
+    min-height: calc(100vh - 200px);
+    padding: 3rem 1.5rem;
+  }
+
+  .post-article {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .post-header {
+    margin-bottom: 3rem;
+  }
+
+  .post-featured-image {
+    width: 100%;
+    height: 400px;
+    overflow: hidden;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    background-color: #2d3748;
+  }
+
+  .post-featured-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .post-header-content {
+    text-align: center;
+  }
+
+  .post-title {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #f7fafc;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+  }
+
+  .post-excerpt {
+    font-size: 1.25rem;
+    color: #cbd5e0;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+
+  .post-meta {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    font-size: 0.875rem;
+    color: #718096;
+  }
+
+  .post-author {
+    font-weight: 500;
+  }
+
+  .post-categories {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .category-tag {
+    background-color: #2d3748;
+    color: #4299e1;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background-color 0.2s;
+  }
+
+  .category-tag:hover {
+    background-color: #4299e1;
+    color: #fff;
+  }
+
+  .post-content {
+    color: #cbd5e0;
+    line-height: 1.8;
+  }
+
+  @media (max-width: 768px) {
+    .post-title {
+      font-size: 2rem;
+    }
+
+    .post-featured-image {
+      height: 250px;
+    }
+  }
+</style>
+

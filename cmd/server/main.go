@@ -134,6 +134,7 @@ func setupAPIRoutes(app *fiber.App, db *gorm.DB) {
 	authProtected := api.Group("/auth")
 	authProtected.Use(middleware.Protected())
 	authProtected.Get("/me", authHandler.Me)
+	authProtected.Put("/profile", authHandler.UpdateProfile)
 	authProtected.Post("/logout", authHandler.Logout)
 
 	// Protected routes (require authentication)
@@ -185,6 +186,26 @@ func setupAPIRoutes(app *fiber.App, db *gorm.DB) {
 	v1.Get("/media", mediaHandler.ListMedia)
 	v1.Get("/media/:filename", mediaHandler.GetMediaInfo)
 
+	// Dashboard handler
+	dashboardHandler := handler.NewDashboardHandler(db)
+	v1.Get("/dashboard/stats", dashboardHandler.GetStats)
+
+	// Post handler
+	postHandler := handler.NewPostHandler(db)
+	v1.Post("/posts", postHandler.CreatePost)
+	v1.Get("/posts", postHandler.ListPosts)
+	v1.Get("/posts/:id", postHandler.GetPost)
+	v1.Put("/posts/:id", postHandler.UpdatePost)
+	v1.Delete("/posts/:id", postHandler.DeletePost)
+
+	// Category handler
+	categoryHandler := handler.NewCategoryHandler(db)
+	v1.Post("/categories", categoryHandler.CreateCategory)
+	v1.Get("/categories", categoryHandler.ListCategories)
+	v1.Get("/categories/:id", categoryHandler.GetCategory)
+	v1.Put("/categories/:id", categoryHandler.UpdateCategory)
+	v1.Delete("/categories/:id", categoryHandler.DeleteCategory)
+
 	// Public API routes (no authentication required)
 	public := app.Group("/api/public")
 	// Set DB in context for public routes (community edition)
@@ -195,6 +216,8 @@ func setupAPIRoutes(app *fiber.App, db *gorm.DB) {
 	public.Get("/settings", settingsHandler.GetSettings)
 	public.Get("/menus/:id", menuHandler.GetMenu) // Public endpoint to get menu by ID
 	public.Get("/pages/*", pageHandler.GetPageBySlugPublic)
+	public.Get("/posts", postHandler.ListPostsPublic)
+	public.Get("/posts/:slug", postHandler.GetPostBySlugPublic)
 }
 
 // errorHandler is the global error handler

@@ -40,10 +40,41 @@ export default function Profile() {
     setLoading(true)
 
     try {
+      // Prepare update data
+      const updateData: { name?: string; password?: string } = {}
+      
+      if (name.trim() && name !== user?.name) {
+        updateData.name = name.trim()
+      }
+      
+      if (password.trim()) {
+        updateData.password = password.trim()
+      }
+
+      // Only make API call if there are changes
+      if (Object.keys(updateData).length === 0) {
+        toast('No changes to save', { icon: 'ℹ️' })
+        setLoading(false)
+        return
+      }
+
       // Update profile via API
-      // Note: We need to add a profile update endpoint
-      // For now, we'll just show a message
-      toast.success('Profile update endpoint will be implemented soon')
+      const updatePromise = authAPI.updateProfile(updateData)
+
+      toast.promise(updatePromise, {
+        loading: 'Updating profile...',
+        success: 'Profile updated successfully!',
+        error: (err: any) => {
+          console.error('Profile update error:', err)
+          return err.response?.data?.error || 'Failed to update profile'
+        },
+      })
+
+      await updatePromise
+
+      // Clear password fields
+      setPassword('')
+      setConfirmPassword('')
       
       // Refresh user data
       if (refreshUser) {
@@ -52,7 +83,7 @@ export default function Profile() {
     } catch (err: any) {
       const errorMsg = err.response?.data?.error || 'Failed to update profile'
       setError(errorMsg)
-      toast.error(errorMsg)
+      // Error toast is handled by toast.promise
     } finally {
       setLoading(false)
     }
